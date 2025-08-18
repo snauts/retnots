@@ -300,6 +300,8 @@ int main(int argc, char **argv) {
     file_name = argv[2];
     option = argv[1][1];
 
+    printf("pcx-dump -%c %s\n", option, argv[2]);
+
     switch (option) {
     case 'r':
 	return reset_tiles();
