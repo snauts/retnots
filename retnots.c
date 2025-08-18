@@ -92,7 +92,7 @@ static void memset(byte *buf, byte val, word count) {
     while (count-- > 0) *buf++ = val;
 }
 
-static void memcpy(byte *dst, byte *src, word count) {
+static void memcpy(byte *dst, const byte *src, word count) {
     while (count-- > 0) *dst++ = *src++;
 }
 
