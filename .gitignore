@@ -1,0 +1,11 @@
+pcx-dump
+*.asm
+*.ihx
+*.lst
+*.map
+*.rel
+*.sym
+*.chr
+*.hdr
+*.prg
+*.nes
