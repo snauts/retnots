@@ -178,11 +178,49 @@ static void wipe_screen(void) {
     wipe_palette();
 }
 
+static const char special[] = " @:";
+static byte char_to_tile(char c) {
+    byte sym;
+    for (sym = 0; sym < sizeof(special) - 1; sym++) {
+	if (special[sym] == c) return sym;
+    }
+
+    sym = sym + c;
+    if (c >= '0' && c <= '9') {
+	return sym - '0';
+    }
+
+    sym = sym + 10;
+    if (c >= 'A' && c <= 'Z') {
+	return sym - 'A';
+    }
+    if (c >= 'a' && c <= 'z') {
+	return sym - 'a';
+    }
+    return 0;
+}
+
+static void print_msg(const char *msg, byte x, word y) {
+    byte i = 0;
+    ppu_ptr = 0x2020 + (y << 5) + x;
+    while (msg[i] != 0) {
+	ppu_buffer[i] = char_to_tile(msg[i]);
+	i++;
+    }
+    ppu_update(i);
+}
+
+static const byte title_palette[] = {
+    0x0f, 0x12, 0x22, 0x32,
+};
+
 void game_startup(void) {
     hw_init();
 
     for (;;) {
 	wipe_screen();
+	print_msg("@ RETNOTS @", 11, 12);
+	setup_palette(title_palette, 0, sizeof(title_palette));
     }
 }
 
