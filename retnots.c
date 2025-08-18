@@ -150,8 +150,40 @@ static void hw_init(void) {
     ppu_ctrl();
 }
 
+static void ppu_update(byte amount) {
+    ppu_count = amount;
+    while (ppu_count > 0) { }
+    ppu_ptr += amount;
+}
+
+static void setup_palette(const byte *ptr, byte offset, byte amount) {
+    ppu_ptr = 0x3f00 + offset;
+    memcpy(ppu_buffer, ptr, amount);
+    ppu_update(amount);
+}
+
+static void wipe_palette(void) {
+    ppu_ptr = 0x3f00;
+    memset(ppu_buffer, 0xf, 32);
+    ppu_update(32);
+}
+
+static void wipe_screen(void) {
+    ppu_ptr = 0x2000;
+    memset(oam, 255, 0x100);
+    memset(ppu_buffer, 0, 32);
+    for (byte i = 0; i < 32; i++) {
+	ppu_update(32);
+    }
+    wipe_palette();
+}
+
 void game_startup(void) {
     hw_init();
+
+    for (;;) {
+	wipe_screen();
+    }
 }
 
 /* must be very last */

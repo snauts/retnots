@@ -26,6 +26,8 @@ build:
 	hex2bin -e prg $(NAME).ihx > /dev/null
 	cat tiles.chr sprites.chr > $(NAME).chr
 	cat header.rom $(NAME).prg $(NAME).chr > $(NAME).nes
+	@echo -n $(NAME) "code size "
+	@grep ^CODE.*bytes $(NAME).map | sed "s/[. ] */ /g" | cut -f 5 -d " "
 
 clean:
 	rm -f *.asm *.ihx *.lst *.map *.rel *.sym *.chr *.hdr *.prg *.nes
