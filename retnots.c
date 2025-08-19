@@ -134,7 +134,7 @@ static void init_memory(void) {
 
     control = BIT(7) | BIT(3);
 
-    memset(oam, 255, 0x100);
+    memset(oam, 255, sizeof(oam));
 }
 
 static void update_scroll(void) {
@@ -264,7 +264,7 @@ static void print_msg(const char *msg, byte x, word y) {
 }
 
 static const byte title_palette[] = {
-    0x0f, 0x12, 0x22, 0x32,
+    0x0f, 0x2d, 0x3d, 0x30,
 };
 
 void game_startup(void) {
