@@ -12,9 +12,11 @@ void sdcc_deps(void) __naked {
     __asm__("_ppu_count:	.ds 1");
     __asm__("_ppu_buffer:	.ds 32");
     __asm__("_counter:		.ds 1");
+    __asm__("_control:		.ds 1");
     __asm__("_signal:		.ds 1");
     __asm__("_button:		.ds 1");
-    __asm__("_scroll:		.ds 2");
+    __asm__("_scroll:		.ds 1");
+    __asm__("_speed:		.ds 1");
 
     __asm__(".area OAM (PAG)");
     __asm__("_oam:		.ds 256");
@@ -83,6 +85,8 @@ void rst(void) __naked {
 #define BUTTON_LEFT	BIT(1)
 #define BUTTON_RIGHT	BIT(0)
 
+#define HEIGHT		240
+
 extern byte oam[256];
 
 extern volatile word ppu_ptr;
@@ -90,9 +94,11 @@ extern volatile byte ppu_count;
 extern volatile byte ppu_buffer[32];
 
 extern volatile byte counter;
+extern volatile byte control;
 extern volatile byte signal;
 extern volatile byte button;
-extern volatile word scroll;
+extern volatile byte scroll;
+extern volatile byte speed;
 
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
@@ -120,18 +126,30 @@ static void clear_palette(void) {
 }
 
 static void init_memory(void) {
+    speed = 0;
     scroll = 0;
     button = 0;
     counter = 0;
     ppu_count = 0;
 
+    control = BIT(7) | BIT(3);
+
     memset(oam, 255, 0x100);
+}
+
+static void update_scroll(void) {
+    scroll += speed;
+    if (scroll >= HEIGHT) {
+	scroll = scroll - HEIGHT;
+	control ^= BIT(1);
+    }
 }
 
 static void ppu_ctrl(void) {
     PPUSCROLL(0x00);
-    PPUSCROLL(scroll & 0xff);
-    PPUCTRL(BIT(7) | BIT(3));
+    PPUSCROLL(scroll);
+    PPUCTRL(control);
+    update_scroll();
 }
 
 void irq_handler(void) {
@@ -256,7 +274,10 @@ void game_startup(void) {
 	wipe_screen();
 	print_msg("@ RETNOTS @", 11, 12);
 	setup_palette(title_palette, 0, sizeof(title_palette));
-	wait_start_button();
+	for (;;) {
+	    wait_start_button();
+	    speed++;
+	}
     }
 }
 
