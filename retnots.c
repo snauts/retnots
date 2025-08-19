@@ -14,7 +14,7 @@ void sdcc_deps(void) __naked {
     __asm__("_counter:		.ds 1");
     __asm__("_signal:		.ds 1");
     __asm__("_button:		.ds 1");
-    __asm__("_scroll:		.ds 1");
+    __asm__("_scroll:		.ds 2");
 
     __asm__(".area OAM (PAG)");
     __asm__("_oam:		.ds 256");
@@ -92,7 +92,7 @@ extern volatile byte ppu_buffer[32];
 extern volatile byte counter;
 extern volatile byte signal;
 extern volatile byte button;
-extern volatile byte scroll;
+extern volatile word scroll;
 
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
@@ -130,7 +130,7 @@ static void init_memory(void) {
 
 static void ppu_ctrl(void) {
     PPUSCROLL(0x00);
-    PPUSCROLL(scroll);
+    PPUSCROLL(scroll & 0xff);
     PPUCTRL(BIT(7) | BIT(3));
 }
 
