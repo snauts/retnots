@@ -244,6 +244,7 @@ static void wait_start_button(void) {
 
 static byte char_to_tile(char c) {
     byte sym = c + 1;
+    if (c == ' ') return 0;
     if (c >= '0' && c <= '9') {
 	return sym - '0';
     }
