@@ -240,18 +240,11 @@ static void wait_start_button(void) {
     while (!(check_button() & BUTTON_START)) { }
 }
 
-static const char special[] = " @:";
 static byte char_to_tile(char c) {
-    byte sym;
-    for (sym = 0; sym < sizeof(special) - 1; sym++) {
-	if (special[sym] == c) return sym;
-    }
-
-    sym = sym + c;
+    byte sym = c + 1;
     if (c >= '0' && c <= '9') {
 	return sym - '0';
     }
-
     sym = sym + 10;
     if (c >= 'A' && c <= 'Z') {
 	return sym - 'A';
@@ -281,7 +274,7 @@ void game_startup(void) {
 
     for (;;) {
 	wipe_screen();
-	print_msg("@ RETNOTS @", 11, 12);
+	print_msg("RETNOTS", 13, 12);
 	setup_palette(title_palette, 0, sizeof(title_palette));
 	for (;;) {
 	    wait_start_button();
