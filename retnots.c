@@ -125,6 +125,10 @@ static void clear_palette(void) {
     }
 }
 
+static void wipe_sprites(void) {
+    memset(oam, 0xff, sizeof(oam));
+}
+
 static void init_memory(void) {
     speed = 0;
     scroll = 0;
@@ -134,7 +138,7 @@ static void init_memory(void) {
 
     control = BIT(7) | BIT(3);
 
-    memset(oam, 255, sizeof(oam));
+    wipe_sprites();
 }
 
 static void update_scroll(void) {
@@ -203,13 +207,18 @@ static void wipe_palette(void) {
     ppu_update(32);
 }
 
-static void wipe_screen(void) {
-    ppu_ptr = 0x2000;
-    memset(oam, 255, 0x100);
+static void wipe_vram(word ptr) {
+    ppu_ptr = ptr;
     memset(ppu_buffer, 0, 32);
-    for (byte i = 0; i < 32; i++) {
+    for (byte i = 0; i < 30; i++) {
 	ppu_update(32);
     }
+}
+
+static void wipe_screen(void) {
+    wipe_sprites();
+    wipe_vram(0x2000);
+    wipe_vram(0x2800);
     wipe_palette();
 }
 
