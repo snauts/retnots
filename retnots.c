@@ -260,7 +260,7 @@ static byte char_to_tile(char c) {
 
 static void print_msg(const char *msg, byte x, word y) {
     byte i = 0;
-    ppu_ptr = 0x2020 + (y << 5) + x;
+    ppu_ptr = 0x2000 + (y << 5) + x;
     while (msg[i] != 0) {
 	ppu_buffer[i] = char_to_tile(msg[i]);
 	i++;
