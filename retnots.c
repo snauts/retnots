@@ -142,19 +142,20 @@ static void init_memory(void) {
     wipe_sprites();
 }
 
-static void update_scroll(void) {
+static byte update_scroll(void) {
+    byte update = scroll & 0x08;
     scroll += speed;
     if (scroll >= HEIGHT) {
 	scroll = scroll - HEIGHT;
 	control ^= BIT(1);
     }
+    return update ^ (scroll & 0x08);
 }
 
 static void ppu_ctrl(void) {
     PPUSCROLL(0x00);
     PPUSCROLL(scroll);
     PPUCTRL(control);
-    update_scroll();
 }
 
 void irq_handler(void) {
@@ -270,17 +271,34 @@ static const byte title_palette[] = {
     0x0f, 0x2d, 0x3d, 0x30,
 };
 
+static void show_title_screen(void) {
+    print_msg("RETNOTS", 13, 12);
+    setup_palette(title_palette, 0, sizeof(title_palette));
+}
+
+static void start_new_game(void) {
+    for (byte i = 0; i < 30; i++) {
+	print_msg("OOO", i, i);
+    }
+}
+
+static void game_loop(void) {
+    for (;;) {
+	wait_signal();
+	update_scroll();
+	if (check_button() & BUTTON_START) speed++;
+    }
+}
+
 void game_startup(void) {
     hw_init();
 
     for (;;) {
 	wipe_screen();
-	print_msg("RETNOTS", 13, 12);
-	setup_palette(title_palette, 0, sizeof(title_palette));
-	for (;;) {
-	    wait_start_button();
-	    speed++;
-	}
+	show_title_screen();
+	wait_start_button();
+	start_new_game();
+	game_loop();
     }
 }
 
