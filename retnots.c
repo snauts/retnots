@@ -279,7 +279,7 @@ static void show_title_screen(void) {
 
 static void start_new_game(void) {
     for (byte i = 0; i < 30; i++) {
-	print_msg("OOO", i, i);
+	print_msg("I       I", 12, i);
     }
 }
 
