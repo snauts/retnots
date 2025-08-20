@@ -109,8 +109,8 @@ static void wait_signal(void) {
     while (signal) { }
 }
 
-static void memset(byte *buf, byte val, word count) {
-    while (count-- > 0) *buf++ = val;
+static void set_ppu_buffer(byte x) {
+    for (byte i = 0; i < 32; i++) ppu_buffer[i] = x;
 }
 
 static void memcpy(byte *dst, const byte *src, word count) {
@@ -126,7 +126,8 @@ static void clear_palette(void) {
 }
 
 static void wipe_sprites(void) {
-    memset(oam, 0xff, sizeof(oam));
+    byte i = 0;
+    do { oam[i++] = 0xff; } while (i != 0);
 }
 
 static void init_memory(void) {
@@ -203,13 +204,13 @@ static void setup_palette(const byte *ptr, byte offset, byte amount) {
 
 static void wipe_palette(void) {
     ppu_ptr = 0x3f00;
-    memset(ppu_buffer, 0xf, 32);
+    set_ppu_buffer(0xf);
     ppu_update(32);
 }
 
 static void wipe_vram(word ptr) {
     ppu_ptr = ptr;
-    memset(ppu_buffer, 0, 32);
+    set_ppu_buffer(0x0);
     for (byte i = 0; i < 32; i++) {
 	ppu_update(32);
     }
