@@ -210,7 +210,7 @@ static void wipe_palette(void) {
 static void wipe_vram(word ptr) {
     ppu_ptr = ptr;
     memset(ppu_buffer, 0, 32);
-    for (byte i = 0; i < 30; i++) {
+    for (byte i = 0; i < 32; i++) {
 	ppu_update(32);
     }
 }
