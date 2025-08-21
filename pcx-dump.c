@@ -224,39 +224,22 @@ static int attr_block(unsigned char *buf) {
 
 static int generate_attr_map(unsigned char *buf, unsigned char *map) {
     int i = 0;
-    memset(map, 0, 64);
-
     for (int y = 0; y < header.h; y += 32) {
 	for (int x = 0; x < header.w; x += 32) {
 	    map[i++] = attr_block(buf + y * header.w + x);
 	}
     }
-
-    return 64;
+    return i;
 }
 
-static void compress_map(FILE *fp, unsigned char *map, int count) {
-    int size = 0;
-    int offset = 0;
-    while (offset < count) {
-	int max = MIN(count - offset, 127);
-	unsigned char *ptr = map + offset;
-	int equal = get_equal(ptr, max);
-	if (equal > 2) {
-	    print_hex(fp, 0x80 | equal, &size);
-	    print_hex(fp, *ptr, &size);
-	    offset += equal;
-	}
-	else {
-	    int diffs = get_diffs(ptr, max);
-	    print_hex(fp, diffs, &size);
-	    for (int i = 0; i < diffs; i++) {
-		print_hex(fp, ptr[i], &size);
-	    }
-	    offset += diffs;
-	}
+static void save_map(FILE *fp, unsigned char *map, int count) {
+    int i = 0;
+    while (i < count) {
+	print_hex(fp, map[i], &i);
     }
-    if (size & 7) fprintf(fp, "\n");
+    if (i & 7) {
+	fprintf(fp, "\n");
+    }
 }
 
 static void process_tiles(unsigned char *buf) {
@@ -268,11 +251,11 @@ static void process_tiles(unsigned char *buf) {
     unsigned char map[header.w * header.h];
 
     fprintf(fp, "static const byte %s_data[] = {\n", name);
-    compress_map(fp, map, generate_data_map(buf, map));
+    save_map(fp, map, generate_data_map(buf, map));
     fprintf(fp, "};\n");
 
     fprintf(fp, "static const byte %s_attr[] = {\n", name);
-    compress_map(fp, map, generate_attr_map(buf, map));
+    save_map(fp, map, generate_attr_map(buf, map));
     fprintf(fp, "};\n");
 
     fclose(fp);
@@ -293,7 +276,6 @@ int main(int argc, char **argv) {
 	printf("  -t   save tiles\n");
 	printf("  -p   pad tiles\n");
 	printf("  -s   save sprites\n");
-	printf("  -m   print music\n");
 	return 0;
     }
 
