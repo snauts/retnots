@@ -94,6 +94,8 @@ void rst(void) __naked {
 #define BUTTON_LEFT	BIT(1)
 #define BUTTON_RIGHT	BIT(0)
 
+#define BUTTON_SOME	(BUTTON_START | BUTTON_LEFT | BUTTON_RIGHT)
+
 #define HEIGHT		240
 
 extern byte oam[256];
@@ -255,8 +257,8 @@ static byte check_button(void) {
     return press;
 }
 
-static void wait_start_button(void) {
-    while (!(check_button() & BUTTON_START)) { }
+static void wait_some_button(void) {
+    while (!(check_button() & BUTTON_SOME)) { }
 }
 
 static byte char_to_tile(char c) {
@@ -356,13 +358,18 @@ static void start_new_game(void) {
 	update_row();
 	ppu_update(32);
     }
+    wait_some_button();
+    speed = 1;
 }
 
 static void check_controls(void) {
-    byte press = check_button();
-    if (press & BUTTON_START) speed++;
-    if (button & BUTTON_RIGHT) pos++;
-    if (button & BUTTON_LEFT) pos--;
+    check_button();
+    if (button & BUTTON_RIGHT) {
+	pos++;
+    }
+    else if (button & BUTTON_LEFT) {
+	pos--;
+    }
 }
 
 static void game_loop(void) {
@@ -381,7 +388,7 @@ void game_startup(void) {
     for (;;) {
 	wipe_screen();
 	show_title_screen();
-	wait_start_button();
+	wait_some_button();
 	start_new_game();
 	game_loop();
     }
