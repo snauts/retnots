@@ -23,6 +23,7 @@ size:
 	gcc $(TOOL_FILES) $(TFLAGS) -lm -o pcx-dump
 	./pcx-dump -r tiles.chr
 	./pcx-dump -t fonts.pcx
+	./pcx-dump -l slope.pcx
 	./pcx-dump -p tiles.chr
 	./pcx-dump -s sprites.pcx
 	echo Compile $(NAME).c

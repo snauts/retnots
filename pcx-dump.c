@@ -14,10 +14,15 @@ static char *file_name;
 
 static unsigned char tileset[MAX_SIZE];
 static int tileset_size;
+static char option;
 
 struct Header {
     unsigned short w, h;
 } header;
+
+static int buf_size(void) {
+    return header.w * header.h;
+}
 
 static int file_size(const char *file) {
     struct stat st;
@@ -46,7 +51,7 @@ static unsigned char *read_pcx(const char *file) {
     header.w = (* (unsigned short *) (buf + 0x8)) + 1;
     header.h = (* (unsigned short *) (buf + 0xa)) + 1;
     if (buf[3] == 8) palette_offset = size - 768;
-    int unpacked_size = header.w * header.h / (buf[3] == 8 ? 1 : 2);
+    int unpacked_size = buf_size() / (buf[3] == 8 ? 1 : 2);
     unsigned char *pixels = malloc(unpacked_size);
 
     int i = 128, j = 0;
@@ -194,15 +199,24 @@ static int generate_data_map(unsigned char *buf, unsigned char *map) {
 	    unsigned char *ptr = buf + y * header.w + x;
 	    get_bit_plane(ptr, result + 0, 1);
 	    get_bit_plane(ptr, result + 8, 2);
-	    map[count++] = look_up_tile(result);
+	    int tile_id = look_up_tile(result);
+	    if (map) map[count++] = tile_id;
 	}
     }
 
     return count;
 }
 
-static int look_up_attr(unsigned char *buf) {
+static int look_up_attr(unsigned char *buf, int offset) {
     int attr = 0;
+
+    if (offset < buf_size()) {
+	buf += offset;
+    }
+    else {
+	return 0;
+    }
+
     for (int y = 0; y < 16; y++) {
 	for (int x = 0; x < 16; x++) {
 	    int offset = x + y * header.w;
@@ -212,12 +226,12 @@ static int look_up_attr(unsigned char *buf) {
     return attr;
 }
 
-static int attr_block(unsigned char *buf) {
+static int attr_block(unsigned char *buf, int where) {
     int result = 0, offset[] = {
 	header.w * 16 + 16, header.w * 16, 16, 0
     };
     for (int i = 0; i < 4; i++) {
-	result = (result << 2) | look_up_attr(buf + offset[i]);
+	result = (result << 2) | look_up_attr(buf, where + offset[i]);
     }
     return result;
 }
@@ -226,7 +240,7 @@ static int generate_attr_map(unsigned char *buf, unsigned char *map) {
     int i = 0;
     for (int y = 0; y < header.h; y += 32) {
 	for (int x = 0; x < header.w; x += 32) {
-	    map[i++] = attr_block(buf + y * header.w + x);
+	    map[i++] = attr_block(buf, y * header.w + x);
 	}
     }
     return i;
@@ -248,7 +262,7 @@ static void process_tiles(unsigned char *buf) {
     FILE *fp = fopen(name, "w");
     name[strlen(name) - 4] = 0;
 
-    unsigned char map[header.w * header.h];
+    unsigned char map[buf_size()];
 
     fprintf(fp, "static const byte %s_data[] = {\n", name);
     save_map(fp, map, generate_data_map(buf, map));
@@ -263,17 +277,21 @@ static void process_tiles(unsigned char *buf) {
 
 static void save_tiles(unsigned char *buf) {
     load_tileset();
-    process_tiles(buf);
+    if (option == 'l') {
+	process_tiles(buf);
+    }
+    else {
+	generate_data_map(buf, NULL);
+    }
     save_tileset();
 }
 
 int main(int argc, char **argv) {
-    char option;
-
     if (argc < 3) {
 	printf("USAGE: pcx-dump [option] file.pcx\n");
 	printf("  -r   reset tiles\n");
 	printf("  -t   save tiles\n");
+	printf("  -t   save level\n");
 	printf("  -p   pad tiles\n");
 	printf("  -s   save sprites\n");
 	return 0;
@@ -296,6 +314,7 @@ int main(int argc, char **argv) {
 
     switch (option) {
     case 't':
+    case 'l':
 	save_tiles(buf);
 	break;
     case 's':
