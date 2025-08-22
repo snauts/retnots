@@ -271,7 +271,7 @@ static void print_msg(const char *msg, byte x, word y) {
 }
 
 static const byte title_palette[] = {
-    0x0f, 0x2d, 0x3d, 0x30,
+    0x30, 0x2d, 0x3d, 0x0c,
 };
 
 static void show_title_screen(void) {
