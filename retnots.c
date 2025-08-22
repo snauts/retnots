@@ -17,6 +17,7 @@ void sdcc_deps(void) __naked {
     __asm__("_row_ptr:		.ds 2");
     __asm__("_row_idx:		.ds 1");
     __asm__("_control:		.ds 1");
+    __asm__("_pending:		.ds 1");
     __asm__("_signal:		.ds 1");
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
@@ -102,12 +103,13 @@ extern volatile byte ppu_buffer[32];
 extern volatile byte counter;
 extern volatile byte control;
 extern volatile byte signal;
-extern volatile byte button;
 extern volatile byte scroll;
-extern volatile byte speed;
 
 extern void* const *row_ptr;
 extern byte row_idx;
+extern byte pending;
+extern byte button;
+extern byte speed;
 
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
@@ -144,6 +146,7 @@ static void init_memory(void) {
     scroll = 0;
     button = 0;
     counter = 0;
+    pending = 0;
     ppu_count = 0;
 
     control = BIT(7) | BIT(3);
@@ -151,14 +154,16 @@ static void init_memory(void) {
     wipe_sprites();
 }
 
-static byte update_scroll(void) {
+static void update_scroll(void) {
     byte update = scroll & 0x08;
     scroll += speed;
     if (scroll >= HEIGHT) {
 	scroll = scroll - HEIGHT;
 	control ^= BIT(1);
     }
-    return update ^ (scroll & 0x08);
+    if (update ^ (scroll & 0x08)) {
+	pending++;
+    }
 }
 
 static void ppu_ctrl(void) {
@@ -295,11 +300,22 @@ static void show_title_screen(void) {
 }
 
 static void update_row(void) {
-    byte i = row_table[row_idx++ & 0x3f];
+    byte i = row_table[row_idx];
     BYTE(ppu_ptr, 0) = (i & 0xf0);
     BYTE(ppu_ptr, 1) = (i & 0x0f) | 0x20;
+    row_idx = (row_idx + 1) & 0x3f;
     ppu_cpy(*row_ptr++);
     ppu_count = 32;
+}
+
+static void produce_new_row(void) {
+    byte i = row_table[row_idx];
+    if ((i & 0xc3) == 0xc3) pending++;
+
+    if (pending > 0) {
+	update_row();
+	pending--;
+    }
 }
 
 static void start_new_game(void) {
@@ -315,6 +331,7 @@ static void game_loop(void) {
     for (;;) {
 	wait_signal();
 	update_scroll();
+	produce_new_row();
 	if (check_button() & BUTTON_START) speed++;
     }
 }
