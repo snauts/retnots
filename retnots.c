@@ -64,6 +64,7 @@ void rst(void) __naked {
 #define BIT(n)		(((byte) 1) << (n))
 #define POS(x, y)	(0x2000 + ((y) << 5) + (x))
 #define BYTE(v, i)	((byte *) &(v))[i]
+#define SIZE(array)	(sizeof(array) / sizeof(*(array)))
 
 #define MEM_RD(a)	(* (volatile byte *) (a))
 #define MEM_WR(a, x)	(* (volatile byte *) (a) = (x))
@@ -333,55 +334,27 @@ static void produce_new_row(void) {
     }
 }
 
-static const byte racoon_img[] = {
-    0x00, 0x01, 0x00,
-    0x10, 0x11, 0x10,
-    0x20, 0x21, 0x20,
+static const byte racoon_init[] = {
+    0x30,0x00,0x00,0x00,  0x30,0x01,0x00,0x08,  0x30,0x00,0x40,0x10,
+    0x38,0x10,0x00,0x00,  0x38,0x11,0x00,0x08,  0x38,0x10,0x40,0x10,
+    0x40,0x20,0x00,0x00,  0x40,0x21,0x00,0x08,  0x40,0x20,0x40,0x10,
 };
 
-static const byte racoon_cfg[] = {
-    0x00, 0x00, 0x40,
-    0x00, 0x00, 0x40,
-    0x00, 0x00, 0x40,
-};
-
-static const byte racoon_x[] = {
-    0x00, 0x08, 0x10,
-    0x00, 0x08, 0x10,
-    0x00, 0x08, 0x10,
-};
-
-static const byte racoon_y[] = {
-    0x30, 0x30, 0x30,
-    0x38, 0x38, 0x38,
-    0x40, 0x40, 0x40,
-};
-
-static void setup_racoon(void) {
-    byte i = 0;
-    for (byte n = 0; n < 9; n++) {
-	oam[i++] = racoon_y[n];
-	oam[i++] = racoon_img[n];
-	oam[i++] = racoon_cfg[n];
-	oam[i++] = pos + racoon_x[n];
+static void animate_racoon(void) {
+    for (byte i = 0; i < SIZE(racoon_init); i++) {
+	byte *ptr = oam + i;
+	*ptr = racoon_init[i];
+	if ((i & 3) == 3) *ptr += pos;
     }
 }
 
 static void start_new_game(void) {
     pos = 116;
     reset_rows();
-    setup_racoon();
+    animate_racoon();
     for (byte i = 0; i < 32; i++) {
 	update_row();
 	ppu_update(32);
-    }
-}
-
-static void animate_racoon(void) {
-    byte i = 3;
-    for (byte n = 0; n < 9; n++) {
-	oam[i] = pos + racoon_x[n];
-	i = i + 4;
     }
 }
 
