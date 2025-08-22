@@ -323,6 +323,7 @@ static void format_addr_buffer(FILE *fp, const char *name, int *addr) {
 	fprintf(fp, " %s_dict+0x%04x,", name, *addr++);
 	if ((i++ & 3) == 3) fprintf(fp, "\n");
     }
+    fprintf(fp, " NULL,\n");
     fprintf(fp, "};\n");
 }
 
