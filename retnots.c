@@ -60,6 +60,7 @@ void rst(void) __naked {
 }
 
 #define BIT(n)		(((byte) 1) << (n))
+#define POS(x, y)	(0x2000 + ((y) << 5) + (x))
 
 #define MEM_RD(a)	(* (volatile byte *) (a))
 #define MEM_WR(a, x)	(* (volatile byte *) (a) = (x))
@@ -265,9 +266,9 @@ static byte char_to_tile(char c) {
     return 0;
 }
 
-static void print_msg(const char *msg, byte x, word y) {
+static void print_msg(const char *msg, word pos) {
     byte i = 0;
-    ppu_ptr = 0x2000 + (y << 5) + x;
+    ppu_ptr = pos;
     while (msg[i] != 0) {
 	ppu_buffer[i] = char_to_tile(msg[i]);
 	i++;
@@ -288,7 +289,7 @@ static const byte game_palette[] = {
 };
 
 static void show_title_screen(void) {
-    print_msg("RETNOTS", 13, 12);
+    print_msg("RETNOTS", POS(13, 12));
     setup_palette(game_palette);
 }
 
