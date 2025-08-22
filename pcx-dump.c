@@ -262,6 +262,24 @@ static void save_map(FILE *fp, unsigned char *map, int count) {
     }
 }
 
+static unsigned char pack_addr(int a) {
+    return (a & 0xf0) | ((a >> 8) & 0xf);
+}
+
+static unsigned char *generate_rows(unsigned char *rows) {
+    int i = 0;
+    for (int p = 0; p < 2; p++) {
+	for (int n = 0; n < 30; n++) {
+	    int base = 0x2000 + (p << 11);
+	    if ((n & 0xf) == 0) {
+		rows[i++] = pack_addr(base + 0x3c0 + ((n & 0x10) << 1));
+	    }
+	    rows[i++] = pack_addr(base + (n << 5));
+	}
+    }
+    return rows;
+}
+
 static void generate_level_data(unsigned char *buf) {
     char name[256];
     replace_ext(name, "hdr");
@@ -280,6 +298,11 @@ static void generate_level_data(unsigned char *buf) {
 
     fprintf(fp, "static const byte %s_attr[] = {\n", name);
     save_map(fp, attr_buf, attrs);
+    fprintf(fp, "};\n");
+
+    unsigned char row_table[64];
+    fprintf(fp, "static const byte row_table[] = {\n");
+    save_map(fp, generate_rows(row_table), sizeof(row_table));
     fprintf(fp, "};\n");
 
     fclose(fp);
