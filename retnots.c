@@ -61,6 +61,7 @@ void rst(void) __naked {
 
 #define BIT(n)		(((byte) 1) << (n))
 #define POS(x, y)	(0x2000 + ((y) << 5) + (x))
+#define BYTE(v, i)	((byte *) &(v))[i]
 
 #define MEM_RD(a)	(* (volatile byte *) (a))
 #define MEM_WR(a, x)	(* (volatile byte *) (a) = (x))
@@ -295,7 +296,8 @@ static void show_title_screen(void) {
 
 static void update_row(void) {
     byte i = row_table[row_idx++ & 0x3f];
-    ppu_ptr = (i & 0xf0) | (((i & 0xf) | 0x20) << 8);
+    BYTE(ppu_ptr, 0) = (i & 0xf0);
+    BYTE(ppu_ptr, 1) = (i & 0x0f) | 0x20;
     ppu_cpy(*row_ptr++);
     ppu_count = 32;
 }
