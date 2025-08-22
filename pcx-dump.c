@@ -318,7 +318,7 @@ static int build_dict(byte *dict, int *addr, byte *tile, byte *attr, int n) {
 
 static void format_addr_buffer(FILE *fp, const char *name, int *addr) {
     int i = 0;
-    fprintf(fp, "static const void *%s_addr[] = {\n", name);
+    fprintf(fp, "static const void * const %s_addr[] = {\n", name);
     while (*addr >= 0) {
 	fprintf(fp, " %s_dict+0x%04x,", name, *addr++);
 	if ((i++ & 3) == 3) fprintf(fp, "\n");

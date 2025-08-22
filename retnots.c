@@ -14,6 +14,8 @@ void sdcc_deps(void) __naked {
     __asm__("_ppu_count:	.ds 1");
     __asm__("_ppu_buffer:	.ds 32");
     __asm__("_counter:		.ds 1");
+    __asm__("_row_ptr:		.ds 2");
+    __asm__("_row_idx:		.ds 1");
     __asm__("_control:		.ds 1");
     __asm__("_signal:		.ds 1");
     __asm__("_button:		.ds 1");
@@ -101,6 +103,9 @@ extern volatile byte signal;
 extern volatile byte button;
 extern volatile byte scroll;
 extern volatile byte speed;
+
+extern byte **row_ptr;
+extern byte row_idx;
 
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
@@ -279,9 +284,19 @@ static void show_title_screen(void) {
     setup_palette(title_palette, 0, sizeof(title_palette));
 }
 
+static void update_row(void) {
+    byte i = row_table[row_idx++ & 0x3f];
+    ppu_ptr = (i & 0xf0) | (((i & 0xf) | 0x20) << 8);
+    memcpy(ppu_buffer, *row_ptr++, 32);
+    ppu_count = 32;
+}
+
 static void start_new_game(void) {
-    for (byte i = 0; i < 30; i++) {
-	print_msg("I       I", 12, i);
+    row_idx = 0;
+    row_ptr = slope_addr;
+    for (byte i = 0; i < 32; i++) {
+	update_row();
+	ppu_update(32);
     }
 }
 
