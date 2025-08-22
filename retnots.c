@@ -22,6 +22,7 @@ void sdcc_deps(void) __naked {
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
     __asm__("_speed:		.ds 1");
+    __asm__("_pos:		.ds 1");
 
     __asm__(".area OAM (PAG)");
     __asm__("_oam:		.ds 256");
@@ -110,6 +111,7 @@ extern byte row_idx;
 extern byte pending;
 extern byte button;
 extern byte speed;
+extern byte pos;
 
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
@@ -350,22 +352,23 @@ static const byte racoon_x[] = {
 };
 
 static const byte racoon_y[] = {
-    0x00, 0x00, 0x00,
-    0x08, 0x08, 0x08,
-    0x10, 0x10, 0x10,
+    0x30, 0x30, 0x30,
+    0x38, 0x38, 0x38,
+    0x40, 0x40, 0x40,
 };
 
 static void setup_racoon(void) {
     byte i = 0;
     for (byte n = 0; n < 9; n++) {
-	oam[i++] = 48 + racoon_y[n];
+	oam[i++] = racoon_y[n];
 	oam[i++] = racoon_img[n];
 	oam[i++] = racoon_cfg[n];
-	oam[i++] = 116 + racoon_x[n];
+	oam[i++] = pos + racoon_x[n];
     }
 }
 
 static void start_new_game(void) {
+    pos = 116;
     reset_rows();
     setup_racoon();
     for (byte i = 0; i < 32; i++) {
@@ -374,12 +377,28 @@ static void start_new_game(void) {
     }
 }
 
+static void animate_racoon(void) {
+    byte i = 3;
+    for (byte n = 0; n < 9; n++) {
+	oam[i] = pos + racoon_x[n];
+	i = i + 4;
+    }
+}
+
+static void check_controls(void) {
+    byte press = check_button();
+    if (press & BUTTON_START) speed++;
+    if (button & BUTTON_RIGHT) pos++;
+    if (button & BUTTON_LEFT) pos--;
+}
+
 static void game_loop(void) {
     for (;;) {
 	wait_signal();
 	update_scroll();
 	produce_new_row();
-	if (check_button() & BUTTON_START) speed++;
+	check_controls();
+	animate_racoon();
     }
 }
 
