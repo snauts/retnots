@@ -256,20 +256,24 @@ static void save_map(FILE *fp, unsigned char *map, int count) {
     }
 }
 
-static void process_tiles(unsigned char *buf) {
+static void generate_level_data(unsigned char *buf) {
     char name[256];
     replace_ext(name, "hdr");
     FILE *fp = fopen(name, "w");
     name[strlen(name) - 4] = 0;
 
-    unsigned char map[buf_size()];
+    unsigned char tile_buf[buf_size() / 64];
+    unsigned char attr_buf[buf_size() / 512];
+
+    int tiles = generate_data_map(buf, tile_buf);
+    int attrs = generate_attr_map(buf, attr_buf);
 
     fprintf(fp, "static const byte %s_data[] = {\n", name);
-    save_map(fp, map, generate_data_map(buf, map));
+    save_map(fp, tile_buf, tiles);
     fprintf(fp, "};\n");
 
     fprintf(fp, "static const byte %s_attr[] = {\n", name);
-    save_map(fp, map, generate_attr_map(buf, map));
+    save_map(fp, attr_buf, attrs);
     fprintf(fp, "};\n");
 
     fclose(fp);
@@ -278,7 +282,7 @@ static void process_tiles(unsigned char *buf) {
 static void save_tiles(unsigned char *buf) {
     load_tileset();
     if (option == 'l') {
-	process_tiles(buf);
+	generate_level_data(buf);
     }
     else {
 	generate_data_map(buf, NULL);
