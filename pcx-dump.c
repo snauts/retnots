@@ -207,10 +207,10 @@ static int generate_data_map(unsigned char *buf, unsigned char *map) {
     return count;
 }
 
-static int look_up_attr(unsigned char *buf, int offset) {
+static int look_up_attr(unsigned char *buf, int chunk, int offset) {
     int attr = 0;
 
-    if (offset < buf_size()) {
+    if (offset < header.w * chunk) {
 	buf += offset;
     }
     else {
@@ -226,22 +226,28 @@ static int look_up_attr(unsigned char *buf, int offset) {
     return attr;
 }
 
-static int attr_block(unsigned char *buf, int where) {
+static int attr_block(unsigned char *buf, int chunk, int where) {
     int result = 0, offset[] = {
 	header.w * 16 + 16, header.w * 16, 16, 0
     };
     for (int i = 0; i < 4; i++) {
-	result = (result << 2) | look_up_attr(buf, where + offset[i]);
+	result = (result << 2) | look_up_attr(buf, chunk, where + offset[i]);
     }
     return result;
 }
 
 static int generate_attr_map(unsigned char *buf, unsigned char *map) {
     int i = 0;
-    for (int y = 0; y < header.h; y += 32) {
-	for (int x = 0; x < header.w; x += 32) {
-	    map[i++] = attr_block(buf, y * header.w + x);
+    int h = header.h;
+    while (h > 0) {
+	int chunk = MIN(240, h);
+	for (int y = 0; y < chunk; y += 32) {
+	    for (int x = 0; x < header.w; x += 32) {
+		map[i++] = attr_block(buf, chunk, y * header.w + x);
+	    }
 	}
+	buf += header.w * 240;
+	h -= chunk;
     }
     return i;
 }
