@@ -299,6 +299,15 @@ static void show_title_screen(void) {
     setup_palette(game_palette);
 }
 
+static void reset_rows(void) {
+    row_ptr = slope_addr;
+    row_idx = 0;
+}
+
+static byte is_bottom(void) {
+    return !BYTE(*row_ptr, 1);
+}
+
 static void update_row(void) {
     byte i = row_table[row_idx];
     BYTE(ppu_ptr, 0) = (i & 0xf0);
@@ -315,12 +324,15 @@ static void produce_new_row(void) {
     if (pending > 0) {
 	update_row();
 	pending--;
+	if (is_bottom()) {
+	    reset_rows();
+	    speed = 0;
+	}
     }
 }
 
 static void start_new_game(void) {
-    row_idx = 0;
-    row_ptr = slope_addr;
+    reset_rows();
     for (byte i = 0; i < 32; i++) {
 	update_row();
 	ppu_update(32);
