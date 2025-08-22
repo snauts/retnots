@@ -104,7 +104,7 @@ extern volatile byte button;
 extern volatile byte scroll;
 extern volatile byte speed;
 
-extern byte **row_ptr;
+extern void* const *row_ptr;
 extern byte row_idx;
 
 static void wait_vblank(void) {
@@ -116,12 +116,12 @@ static void wait_signal(void) {
     while (signal) { }
 }
 
-static void set_ppu_buffer(byte x) {
+static void ppu_set(byte x) {
     for (byte i = 0; i < 32; i++) ppu_buffer[i] = x;
 }
 
-static void memcpy(byte *dst, const byte *src, word count) {
-    while (count-- > 0) *dst++ = *src++;
+static void ppu_cpy(const byte *ptr) {
+    for (byte i = 0; i < 32; i++) ppu_buffer[i] = ptr[i];
 }
 
 static void clear_palette(void) {
@@ -204,21 +204,21 @@ static void ppu_update(byte amount) {
     ppu_ptr += amount;
 }
 
-static void setup_palette(const byte *ptr, byte offset, byte amount) {
-    ppu_ptr = 0x3f00 + offset;
-    memcpy(ppu_buffer, ptr, amount);
-    ppu_update(amount);
+static void setup_palette(const byte *palette) {
+    ppu_ptr = 0x3f00;
+    ppu_cpy(palette);
+    ppu_update(32);
 }
 
 static void wipe_palette(void) {
     ppu_ptr = 0x3f00;
-    set_ppu_buffer(0xf);
+    ppu_set(0xf);
     ppu_update(32);
 }
 
 static void wipe_vram(word ptr) {
     ppu_ptr = ptr;
-    set_ppu_buffer(0x0);
+    ppu_set(0x0);
     for (byte i = 0; i < 32; i++) {
 	ppu_update(32);
     }
@@ -275,19 +275,27 @@ static void print_msg(const char *msg, byte x, word y) {
     ppu_update(i);
 }
 
-static const byte title_palette[] = {
+static const byte game_palette[] = {
+    0x30, 0x2d, 0x3d, 0x0c,
+    0x30, 0x2d, 0x3d, 0x0c,
+    0x30, 0x2d, 0x3d, 0x0c,
+    0x30, 0x2d, 0x3d, 0x0c,
+
+    0x30, 0x2d, 0x3d, 0x0c,
+    0x30, 0x2d, 0x3d, 0x0c,
+    0x30, 0x2d, 0x3d, 0x0c,
     0x30, 0x2d, 0x3d, 0x0c,
 };
 
 static void show_title_screen(void) {
     print_msg("RETNOTS", 13, 12);
-    setup_palette(title_palette, 0, sizeof(title_palette));
+    setup_palette(game_palette);
 }
 
 static void update_row(void) {
     byte i = row_table[row_idx++ & 0x3f];
     ppu_ptr = (i & 0xf0) | (((i & 0xf) | 0x20) << 8);
-    memcpy(ppu_buffer, *row_ptr++, 32);
+    ppu_cpy(*row_ptr++);
     ppu_count = 32;
 }
 
