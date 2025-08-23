@@ -25,6 +25,7 @@ void sdcc_deps(void) __naked {
     __asm__("_speed:		.ds 1");
     __asm__("_safe:		.ds 1");
     __asm__("_line:		.ds 1");
+    __asm__("_bump:		.ds 1");
     __asm__("_pos:		.ds 1");
 
     __asm__(".area OAM (PAG)");
@@ -120,6 +121,7 @@ extern byte pending;
 extern byte button;
 extern byte speed;
 extern byte line;
+extern byte bump;
 extern int8 safe;
 extern byte pos;
 
@@ -156,6 +158,7 @@ static void wipe_sprites(void) {
 static void init_memory(void) {
     safe = 8;
     line = 9;
+    bump = 0;
     speed = 0;
     scroll = 0;
     button = 0;
@@ -354,12 +357,17 @@ static void produce_new_row(void) {
 }
 
 static void prepare_readback(void) {
-    ppu_read = (line < 30 ? 0x2000 : 0x2800) | (line << 5) | ((pos + 8) >> 3);
+    if (line < 30) {
+	ppu_read = 0x2000 | (line << 5) | ((pos + 8) >> 3);
+    }
+    else {
+	ppu_read = 0x2800 | ((line - 30) << 5) | ((pos + 8) >> 3);
+    }
     if (safe > 0) {
 	safe--;
     }
-    else if (ppu_buffer[0] || ppu_buffer[1]) {
-	speed = 0;
+    else {
+	bump = ppu_buffer[0] || ppu_buffer[1];
     }
 }
 
@@ -420,7 +428,7 @@ static void check_controls(void) {
 	animate_racoon(racoon_left);
     }
     else {
-	animate_racoon(racoon_down);
+	animate_racoon(bump ? racoon_stand : racoon_down);
     }
 }
 
