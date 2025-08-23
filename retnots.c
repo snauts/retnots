@@ -357,12 +357,9 @@ static void produce_new_row(void) {
 }
 
 static void prepare_readback(void) {
-    if (line < 30) {
-	ppu_read = 0x2000 | (line << 5) | ((pos + 8) >> 3);
-    }
-    else {
-	ppu_read = 0x2800 | ((line - 30) << 5) | ((pos + 8) >> 3);
-    }
+    byte i = line_table[line];
+    BYTE(ppu_read, 0) = (i & 0xf0) + (pos >> 3);
+    BYTE(ppu_read, 1) = (i & 0x0f) | 0x20;
     if (safe < 0) {
 	bump = ppu_buffer[0] || ppu_buffer[1];
     }

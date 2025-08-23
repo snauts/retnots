@@ -366,6 +366,10 @@ static void generate_level_data(unsigned char *buf) {
     save_map(fp, row_table, generate_rows(row_table, 1));
     fprintf(fp, "};\n");
 
+    fprintf(fp, "static const byte line_table[] = {\n");
+    save_map(fp, row_table, generate_rows(row_table, 0));
+    fprintf(fp, "};\n");
+
     fclose(fp);
 }
 
