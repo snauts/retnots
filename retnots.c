@@ -355,10 +355,11 @@ static const byte racoon_left[] = {
 };
 
 static void animate_racoon(const byte *data) {
-    for (byte i = 0; i < sizeof(racoon_down); i++) {
-	byte *ptr = oam + i;
-	*ptr = *data++;
-	if ((i & 3) == 3) *ptr += pos;
+    for (byte i = 0; i < 36; i++) {
+	oam[i] = *data++;
+	if ((i & 3) == 3) {
+	    oam[i] += pos;
+	}
     }
 }
 
