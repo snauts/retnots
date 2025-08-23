@@ -266,18 +266,18 @@ static unsigned char pack_addr(int a) {
     return (a & 0xf0) | ((a >> 8) & 0xf);
 }
 
-static unsigned char *generate_rows(unsigned char *rows) {
+static int generate_rows(unsigned char *rows, int attrs) {
     int i = 0;
     for (int p = 0; p < 2; p++) {
 	for (int n = 0; n < 30; n++) {
 	    int base = 0x2000 + (p << 11);
-	    if ((n & 0xf) == 0) {
+	    if (attrs && (n & 0xf) == 0) {
 		rows[i++] = pack_addr(base + 0x3c0 + ((n & 0x10) << 1));
 	    }
 	    rows[i++] = pack_addr(base + (n << 5));
 	}
     }
-    return rows;
+    return i;
 }
 
 typedef unsigned char byte;
@@ -351,7 +351,7 @@ static void generate_level_data(unsigned char *buf) {
 
     unsigned char row_table[64];
     fprintf(fp, "static const byte row_table[] = {\n");
-    save_map(fp, generate_rows(row_table), sizeof(row_table));
+    save_map(fp, row_table, generate_rows(row_table, 1));
     fprintf(fp, "};\n");
 
     fclose(fp);
