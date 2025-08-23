@@ -11,6 +11,7 @@ void sdcc_deps(void) __naked {
     __asm__("REGTEMP:		.ds 8");
     __asm__("DPTR:		.ds 2");
     __asm__("_ppu_ptr:		.ds 2");
+    __asm__("_ppu_read: 	.ds 2");
     __asm__("_ppu_count:	.ds 1");
     __asm__("_ppu_buffer:	.ds 32");
     __asm__("_counter:		.ds 1");
@@ -102,6 +103,7 @@ void rst(void) __naked {
 extern byte oam[256];
 
 extern volatile word ppu_ptr;
+extern volatile word ppu_read;
 extern volatile byte ppu_count;
 extern volatile byte ppu_buffer[32];
 
@@ -185,6 +187,12 @@ void irq_handler(void) {
     for (i = 0; i < ppu_count; i++) {
 	PPUDATA(ppu_buffer[i]);
     }
+
+    PPUADDR(ppu_read >> 8);
+    PPUADDR(ppu_read & 0xff);
+    ppu_buffer[0] = PPUDATA_RD();
+    ppu_buffer[1] = PPUDATA_RD();
+
     ppu_count = 0;
     counter++;
 
