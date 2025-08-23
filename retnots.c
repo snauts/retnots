@@ -23,6 +23,7 @@ void sdcc_deps(void) __naked {
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
     __asm__("_speed:		.ds 1");
+    __asm__("_safe:		.ds 1");
     __asm__("_line:		.ds 1");
     __asm__("_pos:		.ds 1");
 
@@ -119,6 +120,7 @@ extern byte pending;
 extern byte button;
 extern byte speed;
 extern byte line;
+extern int8 safe;
 extern byte pos;
 
 static void wait_vblank(void) {
@@ -152,7 +154,8 @@ static void wipe_sprites(void) {
 }
 
 static void init_memory(void) {
-    line = 0;
+    safe = 8;
+    line = 9;
     speed = 0;
     scroll = 0;
     button = 0;
@@ -194,6 +197,7 @@ void irq_handler(void) {
 
     PPUADDR(ppu_read >> 8);
     PPUADDR(ppu_read & 0xff);
+    PPUDATA_RD(); /* read delay */
     ppu_buffer[0] = PPUDATA_RD();
     ppu_buffer[1] = PPUDATA_RD();
 
@@ -349,6 +353,16 @@ static void produce_new_row(void) {
     }
 }
 
+static void prepare_readback(void) {
+    ppu_read = (line < 30 ? 0x2000 : 0x2800) | (line << 5) | ((pos + 8) >> 3);
+    if (safe > 0) {
+	safe--;
+    }
+    else if (ppu_buffer[0] || ppu_buffer[1]) {
+	speed = 0;
+    }
+}
+
 static const byte racoon_stand[] = {
     0x30,0x00,0x00,0x00,  0x30,0x01,0x00,0x08,  0x30,0x02,0x00,0x10,
     0x38,0x10,0x00,0x00,  0x38,0x11,0x00,0x08,  0x38,0x12,0x00,0x10,
@@ -413,6 +427,7 @@ static void game_loop(void) {
     for (;;) {
 	wait_signal();
 	update_scroll();
+	prepare_readback();
 	produce_new_row();
 	check_controls();
     }
