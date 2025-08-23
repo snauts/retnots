@@ -22,6 +22,7 @@ void sdcc_deps(void) __naked {
     __asm__("_signal:		.ds 1");
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
+    __asm__("_score:		.ds 4");
     __asm__("_speed:		.ds 1");
     __asm__("_safe:		.ds 1");
     __asm__("_line:		.ds 1");
@@ -116,6 +117,7 @@ extern volatile byte signal;
 extern volatile byte scroll;
 
 extern void* const *row_ptr;
+extern byte score[4];
 extern byte row_idx;
 extern byte pending;
 extern byte button;
@@ -133,6 +135,9 @@ static void wait_signal(void) {
     signal = 1;
     while (signal) { }
 }
+
+#define MEMSET(ptr, c, n) \
+    for (byte i = 0; i < n; i++) ptr[i] = c;
 
 static void ppu_set(byte x) {
     for (byte i = 0; i < 32; i++) ppu_buffer[i] = x;
@@ -165,6 +170,7 @@ static void init_memory(void) {
     counter = 0;
     pending = 0;
     ppu_count = 0;
+    MEMSET(score, 0, 4);
 
     control = BIT(7) | BIT(3);
 
