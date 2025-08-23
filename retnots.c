@@ -77,6 +77,7 @@ void rst(void) __naked {
 #define PPUSCROLL(x)	MEM_WR(0x2005, x)
 #define PPUADDR(x)	MEM_WR(0x2006, x)
 #define PPUDATA(x)	MEM_WR(0x2007, x)
+#define PPUDATA_RD()	MEM_RD(0x2007)
 
 #define DMCFREQ(x)	MEM_WR(0x4010, x)
 #define OAMDMA(x)	MEM_WR(0x4014, x)
@@ -230,8 +231,8 @@ static void wipe_palette(void) {
 
 static void wipe_vram(word ptr) {
     ppu_ptr = ptr;
-    ppu_set(0x0);
     for (byte i = 0; i < 32; i++) {
+	ppu_set(0x0);
 	ppu_update(32);
     }
 }
