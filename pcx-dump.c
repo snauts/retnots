@@ -183,8 +183,16 @@ static int get_diffs(unsigned char *buf, int max) {
     return max;
 }
 
-static void print_hex(FILE *fp, unsigned char x, int *size) {
-    fprintf(fp, " 0x%02x,", x);
+static void print_hex(FILE *fp, void *ptr, int *size, int w) {
+    ptr += *size * w;
+    switch (w) {
+    case 1:
+	fprintf(fp, " 0x%02x,", * (unsigned char *) ptr);
+	break;
+    case 2:
+	fprintf(fp, " 0x%04x,", * (unsigned short *) ptr);
+	break;
+    }
     if (((*size)++ & 0x7) == 0x7) {
 	fprintf(fp, "\n");
     }
@@ -252,14 +260,18 @@ static int generate_attr_map(unsigned char *buf, unsigned char *map) {
     return i;
 }
 
-static void save_map(FILE *fp, unsigned char *map, int count) {
+static void save_hex(FILE *fp, void *map, int count, int w) {
     int i = 0;
     while (i < count) {
-	print_hex(fp, map[i], &i);
+	print_hex(fp, map, &i, w);
     }
     if (i & 7) {
 	fprintf(fp, "\n");
     }
+}
+
+static void save_map(FILE *fp, void *map, int count) {
+    save_hex(fp, map, count, 1);
 }
 
 static unsigned char pack_addr(int a) {
