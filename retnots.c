@@ -408,9 +408,23 @@ static void animate_racoon(const byte *data) {
     }
 }
 
+static const byte score_img[] = {
+    0x10,0x30,0x01,0x08,
+    0x10,0x30,0x01,0x10,
+    0x10,0x30,0x01,0x18,
+    0x10,0x30,0x01,0x20,
+};
+
+static void show_score(void) {
+    for (byte i = 0; i < SIZE(score_img); i++) {
+	oam[64 + i] = score_img[i];
+    }
+}
+
 static void start_new_game(void) {
     pos = 124;
     reset_rows();
+    show_score();
     animate_racoon(racoon_stand);
     for (byte i = 0; i < 32; i++) {
 	update_row();
