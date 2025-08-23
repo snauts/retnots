@@ -23,6 +23,7 @@ void sdcc_deps(void) __naked {
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
     __asm__("_speed:		.ds 1");
+    __asm__("_line:		.ds 1");
     __asm__("_pos:		.ds 1");
 
     __asm__(".area OAM (PAG)");
@@ -117,6 +118,7 @@ extern byte row_idx;
 extern byte pending;
 extern byte button;
 extern byte speed;
+extern byte line;
 extern byte pos;
 
 static void wait_vblank(void) {
@@ -150,6 +152,7 @@ static void wipe_sprites(void) {
 }
 
 static void init_memory(void) {
+    line = 0;
     speed = 0;
     scroll = 0;
     button = 0;
@@ -170,6 +173,7 @@ static void update_scroll(void) {
 	control ^= BIT(1);
     }
     if (update ^ (scroll & 0x08)) {
+	if (++line >= 60) line = 0;
 	pending++;
     }
 }
