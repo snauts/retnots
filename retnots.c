@@ -156,7 +156,7 @@ static void wipe_sprites(void) {
 }
 
 static void init_memory(void) {
-    safe = 8;
+    safe = 9;
     line = 9;
     bump = 0;
     speed = 0;
@@ -363,11 +363,11 @@ static void prepare_readback(void) {
     else {
 	ppu_read = 0x2800 | ((line - 30) << 5) | ((pos + 8) >> 3);
     }
-    if (safe > 0) {
-	safe--;
+    if (safe < 0) {
+	bump = ppu_buffer[0] || ppu_buffer[1];
     }
     else {
-	bump = ppu_buffer[0] || ppu_buffer[1];
+	safe--;
     }
 }
 
