@@ -442,18 +442,20 @@ static void start_new_game(void) {
 }
 
 static void check_controls(void) {
+    byte i = 6;
     check_button();
     if (button & BUTTON_RIGHT) {
 	pos = pos + 1;
-	animate_racoon(3);
+	i = 3;
     }
     else if (button & BUTTON_LEFT) {
 	pos = pos - 1;
-	animate_racoon(9);
+	i = 9;
     }
-    else {
-	animate_racoon(6);
+    if (bump && bump < 10) {
+	i += 0x30;
     }
+    animate_racoon(i);
 }
 
 static void game_loop(void) {
