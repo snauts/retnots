@@ -22,7 +22,6 @@ void sdcc_deps(void) __naked {
     __asm__("_signal:		.ds 1");
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
-    __asm__("_score:		.ds 4");
     __asm__("_speed:		.ds 1");
     __asm__("_safe:		.ds 1");
     __asm__("_line:		.ds 1");
@@ -118,7 +117,6 @@ extern volatile byte signal;
 extern volatile byte scroll;
 
 extern void* const *row_ptr;
-extern byte score[4];
 extern byte row_idx;
 extern byte pending;
 extern byte button;
@@ -171,7 +169,6 @@ static void init_memory(void) {
     counter = 0;
     pending = 0;
     ppu_count = 0;
-    MEMSET(score, 0, 4);
 
     control = BIT(7) | BIT(3);
 
@@ -362,12 +359,29 @@ static void produce_new_row(void) {
     }
 }
 
+static void inc_score(byte amount) {
+    for (byte i = 77; i > 64; i -= 4) {
+	oam[i] += amount;
+	if (oam[i] >= 10) {
+	    oam[i] -= 10;
+	    amount = 1;
+	}
+	else break;
+    }
+}
+
 static void prepare_readback(void) {
     byte i = line_table[line];
     BYTE(ppu_read, 0) = (i & 0xf0) + (pos >> 3);
     BYTE(ppu_read, 1) = (i & 0x0f) | 0x20;
     if (safe < 0) {
 	bump = MAX(ppu_buffer[0], ppu_buffer[1]);
+	if (bump) {
+	    safe = speed << 4;
+	    if (bump < 10) {
+		inc_score(bump);
+	    }
+	}
     }
     else {
 	safe -= speed;
@@ -402,6 +416,9 @@ static const byte racoon_left[] = {
 static void animate_racoon(const byte *data) {
     for (byte i = 0; i < 36; i++) {
 	oam[i] = *data++;
+	if ((i & 3) == 1 && bump && bump < 10) {
+	    oam[i] += 0x30;
+	}
 	if ((i & 3) == 3) {
 	    oam[i] += pos;
 	}
@@ -449,7 +466,7 @@ static void check_controls(void) {
 	animate_racoon(racoon_left);
     }
     else {
-	animate_racoon(bump ? racoon_stand : racoon_down);
+	animate_racoon(racoon_down);
     }
 }
 
