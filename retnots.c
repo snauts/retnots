@@ -288,7 +288,7 @@ static void wait_some_button(void) {
 }
 
 static byte char_to_tile(char c) {
-    byte sym = c + 1;
+    byte sym = c + 5;
     if (c == ' ') return 0;
     if (c >= '0' && c <= '9') {
 	return sym - '0';
