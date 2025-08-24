@@ -315,7 +315,7 @@ static void print_msg(const char *msg, word pos) {
 
 static const byte game_palette[] = {
     0x30, 0x2d, 0x3d, 0x0c,
-    0x30, 0x2d, 0x3d, 0x0c,
+    0x30, 0x2d, 0x3d, 0x05,
     0x30, 0x2d, 0x3d, 0x0c,
     0x30, 0x2d, 0x3d, 0x0c,
 
@@ -370,7 +370,7 @@ static void prepare_readback(void) {
 	bump = ppu_buffer[0] || ppu_buffer[1];
     }
     else {
-	safe--;
+	safe -= speed;
     }
 }
 
