@@ -381,7 +381,7 @@ static void inc_score(byte amount) {
 }
 
 static void loose_live(void) {
-    falls++;
+    oam[81 + (falls++ << 2)] = 0xff;
 }
 
 static void prepare_readback(void) {
@@ -476,7 +476,7 @@ static void check_controls(void) {
 }
 
 static void game_loop(void) {
-    while (falls < 3) {
+    while (falls <= 3) {
 	wait_signal();
 	update_scroll();
 	prepare_readback();
