@@ -22,6 +22,7 @@ void sdcc_deps(void) __naked {
     __asm__("_signal:		.ds 1");
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
+    __asm__("_falls:		.ds 1");
     __asm__("_speed:		.ds 1");
     __asm__("_safe:		.ds 1");
     __asm__("_line:		.ds 1");
@@ -121,6 +122,7 @@ extern void* const *row_ptr;
 extern byte row_idx;
 extern byte pending;
 extern byte button;
+extern byte falls;
 extern byte speed;
 extern byte line;
 extern byte bump;
@@ -160,20 +162,25 @@ static void wipe_sprites(void) {
     do { oam[i++] = 0xff; } while (i != 0);
 }
 
-static void init_memory(void) {
+static void reset_game(void) {
     safe = 9;
     line = 9;
     bump = 0;
+    falls = 0;
     speed = 0;
     scroll = 0;
     button = 0;
-    counter = 0;
     pending = 0;
+}
+
+static void init_memory(void) {
+    counter = 0;
     ppu_count = 0;
 
-    control = BIT(7) | BIT(3);
-
+    reset_game();
     wipe_sprites();
+
+    control = BIT(7) | BIT(3);
 }
 
 static void update_scroll(void) {
@@ -249,7 +256,7 @@ static void setup_palette(const byte *palette) {
 
 static void wipe_palette(void) {
     ppu_ptr = 0x3f00;
-    ppu_set(0xf);
+    ppu_set(0x30);
     ppu_update(32);
 }
 
@@ -262,10 +269,12 @@ static void wipe_vram(word ptr) {
 }
 
 static void wipe_screen(void) {
+    wipe_palette();
     wipe_sprites();
     wipe_vram(0x2000);
     wipe_vram(0x2800);
-    wipe_palette();
+    control &= ~BIT(1);
+    scroll = 0;
 }
 
 static byte check_button(void) {
@@ -371,6 +380,10 @@ static void inc_score(byte amount) {
     }
 }
 
+static void loose_live(void) {
+    falls++;
+}
+
 static void prepare_readback(void) {
     byte i = line_table[line];
     BYTE(ppu_read, 0) = (i & 0xf0) + (pos >> 3);
@@ -381,6 +394,9 @@ static void prepare_readback(void) {
 	    safe = speed << 4;
 	    if (bump < SPECIAL) {
 		inc_score(bump);
+	    }
+	    else {
+		loose_live();
 	    }
 	}
     }
@@ -431,6 +447,7 @@ static void show_score(void) {
 
 static void start_new_game(void) {
     pos = 124;
+    reset_game();
     reset_rows();
     show_score();
     animate_racoon(0);
@@ -459,13 +476,20 @@ static void check_controls(void) {
 }
 
 static void game_loop(void) {
-    for (;;) {
+    while (falls < 3) {
 	wait_signal();
 	update_scroll();
 	prepare_readback();
 	produce_new_row();
 	check_controls();
     }
+}
+
+static void stop_game(void) {
+    wipe_screen();
+    print_msg("GAME OVER", POS(12, 12));
+    setup_palette(game_palette);
+    wait_some_button();
 }
 
 void game_startup(void) {
@@ -477,6 +501,7 @@ void game_startup(void) {
 	wait_some_button();
 	start_new_game();
 	game_loop();
+	stop_game();
     }
 }
 
