@@ -388,10 +388,11 @@ static void prepare_readback(void) {
     byte i = line_table[line];
     BYTE(ppu_read, 0) = (i & 0xf0) + (pos >> 3);
     BYTE(ppu_read, 1) = (i & 0x0f) | 0x20;
+    byte hit = MAX(ppu_buffer[0], ppu_buffer[1]);
     if (safe < 0) {
-	bump = MAX(ppu_buffer[0], ppu_buffer[1]);
+	bump = hit;
 	if (bump) {
-	    safe = speed << 4;
+	    safe = 9;
 	    if (bump < SPECIAL) {
 		inc_score(bump);
 	    }
@@ -400,7 +401,7 @@ static void prepare_readback(void) {
 	    }
 	}
     }
-    else {
+    else if (hit == 0) {
 	safe -= speed;
     }
 }
