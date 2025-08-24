@@ -68,6 +68,7 @@ void rst(void) __naked {
 
 #define BIT(n)		(((byte) 1) << (n))
 #define POS(x, y)	(0x2000 + ((y) << 5) + (x))
+#define MAX(x, y)	((x) > (y) ? (x) : (y))
 #define BYTE(v, i)	((byte *) &(v))[i]
 #define SIZE(array)	(sizeof(array) / sizeof(*(array)))
 
@@ -366,7 +367,7 @@ static void prepare_readback(void) {
     BYTE(ppu_read, 0) = (i & 0xf0) + (pos >> 3);
     BYTE(ppu_read, 1) = (i & 0x0f) | 0x20;
     if (safe < 0) {
-	bump = ppu_buffer[0] || ppu_buffer[1];
+	bump = MAX(ppu_buffer[0], ppu_buffer[1]);
     }
     else {
 	safe -= speed;
