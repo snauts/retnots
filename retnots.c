@@ -103,6 +103,7 @@ void rst(void) __naked {
 #define BUTTON_SOME	(BUTTON_START | BUTTON_LEFT | BUTTON_RIGHT)
 
 #define HEIGHT		240
+#define SPECIAL 	5
 
 extern byte oam[256];
 
@@ -378,7 +379,7 @@ static void prepare_readback(void) {
 	bump = MAX(ppu_buffer[0], ppu_buffer[1]);
 	if (bump) {
 	    safe = speed << 4;
-	    if (bump < 10) {
+	    if (bump < SPECIAL) {
 		inc_score(bump);
 	    }
 	}
@@ -452,9 +453,8 @@ static void check_controls(void) {
 	pos = pos - 1;
 	i = 9;
     }
-    if (0 < bump && bump < 10) {
-	i += 0x30;
-    }
+    if (bump >= SPECIAL) i = 0;
+    if (bump) i += 0x30;
     animate_racoon(i);
 }
 
