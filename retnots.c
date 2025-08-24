@@ -452,7 +452,7 @@ static void check_controls(void) {
 	pos = pos - 1;
 	i = 9;
     }
-    if (bump && bump < 10) {
+    if (0 < bump && bump < 10) {
 	i += 0x30;
     }
     animate_racoon(i);
