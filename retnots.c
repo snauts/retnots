@@ -317,7 +317,7 @@ static void wait_some_button(void) {
 }
 
 static byte char_to_tile(char c) {
-    byte sym = c + 5;
+    byte sym = c + 15;
     if (c == ' ') return 0;
     if (c >= '0' && c <= '9') {
 	return sym - '0';
@@ -455,8 +455,8 @@ static void loose_live(void) {
 }
 
 static const byte tile_score[] = {
-    0, 1, 2, 3, 4, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
+    0x0, 0x1, 0x2, 0x3, 0x4, 0xa, 0xa, 0xa,
+    0xa, 0xa, 0xa, 0xa, 0xa, 0xa, 0xa, 0x0,
 };
 
 static void hit_tile(byte hit) {
@@ -465,6 +465,9 @@ static void hit_tile(byte hit) {
 	safe = 9;
 	if (bump < SPECIAL) {
 	    get_score(bump);
+	}
+	else if (bump == SPECIAL) {
+	    get_score(1);
 	}
 	else {
 	    loose_live();
@@ -483,7 +486,7 @@ static void prepare_readback(void) {
     if (safe < 0) {
 	hit_tile(hit);
     }
-    else if (hit == 0) {
+    else if (hit < SIZE(tile_score)) {
 	safe -= speed;
     }
 }
@@ -553,7 +556,12 @@ static void check_controls(void) {
 	pos = pos - 1;
 	i = 9;
     }
-    if (bump >= SPECIAL) i = 0;
+    if (bump == SPECIAL) {
+	i = 12;
+    }
+    else if (bump > SPECIAL) {
+	i = 0;
+    }
     if (bump) i += 0x30;
     animate_racoon(i);
 }
