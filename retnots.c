@@ -22,7 +22,6 @@ void sdcc_deps(void) __naked {
     __asm__("_signal:		.ds 1");
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
-    __asm__("_noise:		.ds 1");
     __asm__("_sound:		.ds 1");
     __asm__("_falls:		.ds 1");
     __asm__("_speed:		.ds 1");
@@ -132,7 +131,6 @@ extern void* const *row_ptr;
 extern byte row_idx;
 extern byte pending;
 extern byte button;
-extern byte noise;
 extern byte sound;
 extern byte falls;
 extern byte speed;
@@ -178,7 +176,6 @@ static void reset_game(void) {
     safe = 9;
     line = 9;
     bump = 0;
-    noise = 0;
     sound = 0;
     falls = 0;
     speed = 0;
@@ -398,12 +395,13 @@ static void sound_effect(void) {
     static const byte sfx[] = {
 	0x35, 0x47, 0x54, 0x6a,
     };
-    if (noise >= 0x30) {
+    if (sound >= 0x30) {
 	NOISE_LO(0x0a);
 	NOISE_HI(0xf8);
-	NOISE_VL(noise--);
+	NOISE_VL(sound--);
+	if (sound < 0x30) falls++;
     }
-    if (sound) {
+    if (sound > 0x00 && sound < 0x10) {
 	TRI_LO(sfx[sound >> 2]);
 	TRI_HI(0x00);
 	TRI_CR(0x0f);
@@ -412,8 +410,8 @@ static void sound_effect(void) {
 }
 
 static void loose_live(void) {
-    oam[81 + (falls++ << 2)] = 0xff;
-    noise = 0x3f;
+    oam[81 + (falls << 2)] = 0xff;
+    sound = 0x3f;
 }
 
 static void prepare_readback(void) {
