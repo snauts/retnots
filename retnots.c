@@ -417,12 +417,12 @@ static void animate_score(void) {
     }
 }
 
-static void get_score(void) {
+static void get_score(byte amount) {
     oam[36] = oam[4];
-    oam[37] = bump;
+    oam[37] = amount;
     oam[38] = 0x01;
     oam[39] = oam[7];
-    inc_score(bump);
+    inc_score(amount);
     sound = 0xf;
 }
 
@@ -441,7 +441,7 @@ static void hit_tile(byte hit) {
     if (bump) {
 	safe = 9;
 	if (bump < SPECIAL) {
-	    get_score();
+	    get_score(bump);
 	}
 	else {
 	    loose_live();
