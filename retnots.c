@@ -139,6 +139,10 @@ extern byte bump;
 extern int8 safe;
 extern byte pos;
 
+static const char default_table[] = "HORACE 0300TOMBA  0200JENOTS 0100";
+
+static byte table[sizeof(default_table)];
+
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
 }
@@ -184,6 +188,8 @@ static void reset_game(void) {
     pending = 0;
 }
 
+static byte char_to_tile(char c);
+
 static void init_memory(void) {
     counter = 0;
     ppu_count = 0;
@@ -192,6 +198,10 @@ static void init_memory(void) {
     wipe_sprites();
 
     control = BIT(7) | BIT(3);
+
+    for (byte i = 0; i < sizeof(default_table); i++) {
+	table[i] = char_to_tile(default_table[i]);
+    }
 }
 
 static void update_scroll(void) {
@@ -344,9 +354,22 @@ static const byte game_palette[] = {
     0x30, 0x2d, 0x3d, 0x0c,
 };
 
+static void show_highscore_table(void) {
+    byte i = 0;
+    for (byte y = 0; y < 3; y++) {
+	ppu_ptr = 0x228a + (y << 6);
+	for (byte x = 0; x < 13; x++) {
+	    byte spacing = (7 <= x && x <= 8);
+	    ppu_buffer[x] = spacing ? 0 : table[i++];
+	}
+	ppu_update(13);
+    }
+}
+
 static void show_title_screen(void) {
     print_msg("RETNOTS", POS(13, 12));
     setup_palette(game_palette);
+    show_highscore_table();
 }
 
 static void reset_rows(void) {
