@@ -317,7 +317,7 @@ static void wait_some_button(void) {
 }
 
 static byte char_to_tile(char c) {
-    byte sym = c + 15;
+    byte sym = c + 16;
     if (c == ' ') return 0;
     if (c >= '0' && c <= '9') {
 	return sym - '0';
@@ -344,7 +344,7 @@ static void print_msg(const char *msg, word pos) {
 
 static const byte game_palette[] = {
     0x30, 0x2d, 0x3d, 0x0c,
-    0x30, 0x32, 0x31, 0x05,
+    0x30, 0x0f, 0x31, 0x05,
     0x30, 0x2d, 0x3d, 0x0c,
     0x30, 0x2d, 0x3d, 0x0c,
 
