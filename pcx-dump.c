@@ -306,9 +306,16 @@ static int search_dict(byte *ptr, byte *dict, int *size) {
     return n;
 }
 
+static byte *predict = NULL;
+static int predict_size = 0;
+
 static int build_dict(byte *dict, int *addr, byte *tile, byte *attr, int n) {
     int row = 0;
     int size = 0;
+    if (predict) {
+	memcpy(dict, predict, predict_size);
+	size = predict_size;
+    }
     while (n > 0) {
 	byte *ptr;;
 	byte i = row % 32;
@@ -384,12 +391,23 @@ static void save_tiles(unsigned char *buf) {
     save_tileset();
 }
 
+static void load_pre_dictionary(void) {
+    unsigned char *buf = read_pcx("predict.pcx");
+    if (buf == NULL) return;
+    load_tileset();
+    predict_size = buf_size() / 64;
+    predict = malloc(predict_size);
+    generate_data_map(buf, predict);
+    save_tileset();
+    free(buf);
+}
+
 int main(int argc, char **argv) {
     if (argc < 3) {
 	printf("USAGE: pcx-dump [option] file.pcx\n");
 	printf("  -r   reset tiles\n");
 	printf("  -t   save tiles\n");
-	printf("  -t   save level\n");
+	printf("  -l   save level\n");
 	printf("  -p   pad tiles\n");
 	printf("  -s   save sprites\n");
 	return 0;
@@ -407,6 +425,8 @@ int main(int argc, char **argv) {
 	return pad_tiles();
     }
 
+    if (option == 'l') load_pre_dictionary();
+
     unsigned char *buf = read_pcx(file_name);
     if (buf == NULL) return -ENOENT;
 
@@ -421,5 +441,8 @@ int main(int argc, char **argv) {
     }
 
     free(buf);
+    if (predict) {
+	free(predict);
+    }
     return 0;
 }
