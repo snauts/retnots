@@ -409,6 +409,23 @@ static void sound_effect(void) {
     }
 }
 
+static void animate_score(void) {
+    if (oam[37] != 0xff) {
+	if (oam[36]-- < 0x10) {
+	    oam[37] = 0xff;
+	}
+    }
+}
+
+static void get_score(void) {
+    oam[36] = oam[4];
+    oam[37] = bump;
+    oam[38] = 0x01;
+    oam[39] = oam[7];
+    inc_score(bump);
+    sound = 0xf;
+}
+
 static void loose_live(void) {
     oam[81 + (falls << 2)] = 0xff;
     sound = 0x3f;
@@ -424,8 +441,7 @@ static void prepare_readback(void) {
 	if (bump) {
 	    safe = 9;
 	    if (bump < SPECIAL) {
-		inc_score(bump);
-		sound = 0xf;
+		get_score();
 	    }
 	    else {
 		loose_live();
@@ -514,6 +530,7 @@ static void game_loop(void) {
 	prepare_readback();
 	produce_new_row();
 	check_controls();
+	animate_score();
 	sound_effect();
     }
 }
