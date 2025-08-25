@@ -463,11 +463,11 @@ static void start_new_game(void) {
 static void check_controls(void) {
     byte i = 6;
     check_button();
-    if (button & BUTTON_RIGHT) {
+    if (button & BUTTON_RIGHT && pos < 240) {
 	pos = pos + 1;
 	i = 3;
     }
-    else if (button & BUTTON_LEFT) {
+    else if (button & BUTTON_LEFT && pos > 8) {
 	pos = pos - 1;
 	i = 9;
     }
