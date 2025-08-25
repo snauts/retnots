@@ -23,6 +23,7 @@ void sdcc_deps(void) __naked {
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
     __asm__("_noise:		.ds 1");
+    __asm__("_sound:		.ds 1");
     __asm__("_falls:		.ds 1");
     __asm__("_speed:		.ds 1");
     __asm__("_safe:		.ds 1");
@@ -86,6 +87,10 @@ void rst(void) __naked {
 #define PPUDATA(x)	MEM_WR(0x2007, x)
 #define PPUDATA_RD()	MEM_RD(0x2007)
 
+#define TRI_CR(x)	MEM_WR(0x4008, x)
+#define TRI_LO(x)	MEM_WR(0x400A, x)
+#define TRI_HI(x)	MEM_WR(0x400B, x)
+
 #define NOISE_VL(x)	MEM_WR(0x400C, x)
 #define NOISE_LO(x)	MEM_WR(0x400E, x)
 #define NOISE_HI(x)	MEM_WR(0x400F, x)
@@ -128,6 +133,7 @@ extern byte row_idx;
 extern byte pending;
 extern byte button;
 extern byte noise;
+extern byte sound;
 extern byte falls;
 extern byte speed;
 extern byte line;
@@ -173,6 +179,7 @@ static void reset_game(void) {
     line = 9;
     bump = 0;
     noise = 0;
+    sound = 0;
     falls = 0;
     speed = 0;
     scroll = 0;
@@ -388,10 +395,19 @@ static void inc_score(byte amount) {
 }
 
 static void sound_effect(void) {
+    static const byte sfx[] = {
+	0x35, 0x47, 0x54, 0x6a,
+    };
     if (noise >= 0x30) {
 	NOISE_LO(0x0a);
 	NOISE_HI(0xf8);
 	NOISE_VL(noise--);
+    }
+    if (sound) {
+	TRI_LO(sfx[sound >> 2]);
+	TRI_HI(0x00);
+	TRI_CR(0x0f);
+	sound--;
     }
 }
 
@@ -411,6 +427,7 @@ static void prepare_readback(void) {
 	    safe = 9;
 	    if (bump < SPECIAL) {
 		inc_score(bump);
+		sound = 0xf;
 	    }
 	    else {
 		loose_live();
