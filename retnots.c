@@ -546,23 +546,22 @@ static void start_new_game(void) {
 }
 
 static void check_controls(void) {
-    byte i = 6;
     check_button();
+    byte i = bump ? 0x36 : 0x06;
     if (button & BUTTON_RIGHT && pos < 240) {
 	pos = pos + 1;
-	i = 3;
+	i -= 3;
     }
     else if (button & BUTTON_LEFT && pos > 8) {
 	pos = pos - 1;
-	i = 9;
+	i += 3;
     }
     if (bump == SPECIAL) {
 	i = 12;
     }
     else if (bump > SPECIAL) {
-	i = 0;
+	i = 0x30;
     }
-    if (bump) i += 0x30;
     animate_racoon(i);
 }
 
