@@ -113,7 +113,7 @@ void rst(void) __naked {
 #define BUTTON_SOME	(BUTTON_START | BUTTON_LEFT | BUTTON_RIGHT)
 
 #define HEIGHT		240
-#define SPECIAL 	5
+#define SPECIAL 	10
 
 extern byte oam[256];
 
@@ -431,22 +431,34 @@ static void loose_live(void) {
     sound = 0x3f;
 }
 
+static const byte tile_score[] = {
+    0, 1, 2, 3, 4, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+};
+
+static void hit_tile(byte hit) {
+    bump = hit;
+    if (bump) {
+	safe = 9;
+	if (bump < SPECIAL) {
+	    get_score();
+	}
+	else {
+	    loose_live();
+	}
+    }
+}
+
 static void prepare_readback(void) {
     byte i = line_table[line];
     BYTE(ppu_read, 0) = (i & 0xf0) + (pos >> 3);
     BYTE(ppu_read, 1) = (i & 0x0f) | 0x20;
+
     byte hit = MAX(ppu_buffer[0], ppu_buffer[1]);
+    if (hit < SIZE(tile_score)) hit = tile_score[hit];
+
     if (safe < 0) {
-	bump = hit;
-	if (bump) {
-	    safe = 9;
-	    if (bump < SPECIAL) {
-		get_score();
-	    }
-	    else {
-		loose_live();
-	    }
-	}
+	hit_tile(hit);
     }
     else if (hit == 0) {
 	safe -= speed;
