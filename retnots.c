@@ -534,7 +534,7 @@ static void start_new_game(void) {
     reset_rows();
     show_score();
     animate_racoon(0);
-    for (byte i = 0; i < 32; i++) {
+    for (byte i = 0; i < 40; i++) {
 	update_row();
 	ppu_update(32);
     }
