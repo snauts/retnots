@@ -145,7 +145,7 @@ extern byte bump;
 extern int8 safe;
 extern byte pos;
 
-static const char default_table[] = "HORACE 0300JENOTS 0200ARCHA  0100";
+static const char default_table[] = "HORACE 0300JENOTS 0200ARCHIE 0100";
 
 static byte table[sizeof(default_table)];
 
