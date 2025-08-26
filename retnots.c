@@ -688,9 +688,8 @@ static void stop_game(void) {
 }
 
 static void show_title_screen(void) {
-    print_msg("RETRO ISTABA MINIFEST 2025", POS(3, 27));
+    reset_rows(title, 30);
     show_highscore_table();
-    reset_rows(title, 16);
     setup_palette();
     wait_button();
 }
