@@ -160,8 +160,8 @@ static void wait_signal(void) {
     if (benchmark > ticks) benchmark = ticks;
 }
 
-static void ppu_set(byte x) {
-    for (byte i = 0; i < 32; i++) ppu_buffer[i] = x;
+static void memset(byte *buf, byte val, byte count) {
+    while (count-- > 0) { *buf++ = val; }
 }
 
 static void ppu_cpy(const byte *ptr) {
@@ -283,14 +283,14 @@ static void setup_palette(const byte *palette) {
 
 static void wipe_palette(void) {
     ppu_ptr = 0x3f00;
-    ppu_set(0x30);
+    memset(ppu_buffer, 0x30, 32);
     ppu_update(32);
 }
 
 static void wipe_vram(word ptr) {
     ppu_ptr = ptr;
     for (byte i = 0; i < 32; i++) {
-	ppu_set(0x0);
+	memset(ppu_buffer, 0x00, 32);
 	ppu_update(32);
     }
 }
@@ -363,7 +363,7 @@ static const byte game_palette[] = {
 static void show_highscore_table(void) {
     byte i = 0;
     for (byte y = 0; y < 3; y++) {
-	ppu_ptr = 0x222a + (y << 6);
+	ppu_ptr = POS(10, 17) + (y << 6);
 	for (byte x = 0; x < 13; x++) {
 	    byte spacing = (7 <= x && x <= 8);
 	    ppu_buffer[x] = spacing ? 0 : table[i++];
@@ -619,6 +619,69 @@ static void game_loop(void) {
 
 static const char *finish_str(void) {
     return is_bottom() ? "GAME DONE" : "GAME OVER";
+}
+
+#define ENTER_X	13
+#define ENTER_Y	14
+
+static void move_caret(byte caret) {
+    oam[128] = 8 * ENTER_Y + 2;
+    oam[129] = counter & 0x10 ? 11 : 12;
+    oam[130] = 0x0;
+    oam[131] = 8 * ENTER_X + (caret << 3);
+}
+
+static void update_char(byte *ptr, byte dir) {
+    *ptr += dir;
+    byte A = char_to_tile('A');
+    byte Z = char_to_tile('Z');
+    if (*ptr == 1) {
+	*ptr = A;
+    }
+    else if (*ptr == 255) {
+	*ptr = Z;
+    }
+    else if (*ptr < A || *ptr > Z) {
+	*ptr = 0;
+    }
+}
+
+static void display_char(byte *name, byte caret) {
+    ppu_ptr = POS(ENTER_X, ENTER_Y) + caret;
+    ppu_buffer[0] = name[caret];
+    ppu_count = 1;
+}
+
+static char name[7];
+static void enter_new_record_name(void) {
+    byte caret = 0;
+
+    memset(name, 0, SIZE(name));
+
+    for (;;) {
+	wait_signal();
+	move_caret(caret);
+	byte state = check_button();
+
+	if (state & BUTTON_START) {
+	    oam[129] = 0xff;
+	    break;
+	}
+	else if (state & SKI_LEFT) {
+	    caret = caret == 0 ? 6 : caret - 1;
+	}
+	else if (state & SKI_RIGHT) {
+	    caret = caret == 6 ? 0 : caret + 1;
+	}
+	else if (state & BUTTON_UP) {
+	    update_char(name + caret, 255);
+	}
+	else if (state & BUTTON_DOWN) {
+	    update_char(name + caret, 1);
+	}
+
+	display_char(name, caret);
+    }
 }
 
 static void stop_game(void) {
