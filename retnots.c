@@ -157,9 +157,6 @@ static void wait_signal(void) {
     if (benchmark > ticks) benchmark = ticks;
 }
 
-#define MEMSET(ptr, c, n) \
-    for (byte i = 0; i < n; i++) ptr[i] = c;
-
 static void ppu_set(byte x) {
     for (byte i = 0; i < 32; i++) ppu_buffer[i] = x;
 }
@@ -378,13 +375,41 @@ static void show_title_screen(void) {
     show_highscore_table();
 }
 
+static byte head, tail;
+static byte window[256];
+
+#define ENOUGH() (((head - tail) & 0xff) < 32)
+
+static void decompress(void) {
+    while (ENOUGH() && *row_ptr) {
+        byte n = *row_ptr & 0x7f;
+        if (*(row_ptr++) & 0x80) {
+	    while (n-- > 0) {
+		byte from = head - *row_ptr;
+		window[head] = window[from];
+		head++;
+	    }
+	    row_ptr++;
+        }
+        else {
+	    while (n-- > 0) {
+		window[head] = *row_ptr;
+		row_ptr++;
+		head++;
+	    }
+        }
+    }
+}
+
 static void reset_rows(void) {
     row_ptr = slope;
     row_idx = 0;
+    head = 0;
+    tail = 0;
 }
 
 static byte is_bottom(void) {
-    return row_ptr == (slope + SIZE(slope));
+    return *row_ptr == 0;
 }
 
 static void update_row(void) {
@@ -392,9 +417,11 @@ static void update_row(void) {
     BYTE(ppu_ptr, 0) = (i & 0xf0);
     BYTE(ppu_ptr, 1) = (i & 0x0f) | 0x20;
     row_idx = (row_idx + 1) & 0x3f;
-    ppu_cpy(row_ptr);
+    decompress();
+    for (byte i = 0; i < 32; i++) {
+	ppu_buffer[i] = window[tail++];
+    }
     ppu_count = 32;
-    row_ptr += 32;
 }
 
 static void produce_new_row(void) {

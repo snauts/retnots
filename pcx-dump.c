@@ -310,6 +310,7 @@ static void generate_level_data(unsigned char *buf) {
     int attr_count = generate_attr_map(buf, attr);
 
     unsigned char data[2 * max_tiles];
+    unsigned char done[2 * max_tiles];
 
     int size = 0, chunk = 512;
     unsigned char *pt = tile;
@@ -327,7 +328,7 @@ static void generate_level_data(unsigned char *buf) {
     }
 
     fprintf(fp, "static const byte %s[] = {\n", name);
-    save_map(fp, data, size);
+    save_map(fp, done, compress(done, data, size));
     fprintf(fp, "};\n");
 
     unsigned char row_table[64];
