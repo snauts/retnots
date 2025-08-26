@@ -294,6 +294,17 @@ static int generate_rows(unsigned char *rows, int attrs) {
 
 int compress(void *dst, void *src, int size);
 
+static void save_row_tables(FILE *fp) {
+    unsigned char row_table[64];
+    fprintf(fp, "static const byte row_table[] = {\n");
+    save_map(fp, row_table, generate_rows(row_table, 1));
+    fprintf(fp, "};\n");
+
+    fprintf(fp, "static const byte line_table[] = {\n");
+    save_map(fp, row_table, generate_rows(row_table, 0));
+    fprintf(fp, "};\n");
+}
+
 static void generate_level_data(unsigned char *buf) {
     char name[256];
     replace_ext(name, "hdr");
@@ -331,14 +342,9 @@ static void generate_level_data(unsigned char *buf) {
     save_map(fp, done, compress(done, data, size));
     fprintf(fp, "};\n");
 
-    unsigned char row_table[64];
-    fprintf(fp, "static const byte row_table[] = {\n");
-    save_map(fp, row_table, generate_rows(row_table, 1));
-    fprintf(fp, "};\n");
-
-    fprintf(fp, "static const byte line_table[] = {\n");
-    save_map(fp, row_table, generate_rows(row_table, 0));
-    fprintf(fp, "};\n");
+    if (strcmp(file_name, "slope.pcx") == 0) {
+	save_row_tables(fp);
+    }
 
     fclose(fp);
 }
