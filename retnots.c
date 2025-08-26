@@ -569,10 +569,12 @@ static void show_score(void) {
 
 static void start_new_game(void) {
     pos = 124;
+    wipe_palette();
     reset_game();
     show_score();
     reset_rows(slope, 36);
     animate_racoon(0);
+    setup_palette();
     wait_button();
     speed = 1;
 }
