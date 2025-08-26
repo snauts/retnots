@@ -557,7 +557,7 @@ static void check_controls(void) {
 	i += 3;
     }
     if (bump == SPECIAL) {
-	i = 12;
+	i = counter & 0x10 ? 0x0c : 0x3c;
     }
     else if (bump > SPECIAL) {
 	i = 0x30;
