@@ -164,10 +164,6 @@ static void memset(byte *buf, byte val, byte count) {
     while (count-- > 0) { *buf++ = val; }
 }
 
-static void ppu_cpy(const byte *ptr) {
-    for (byte i = 0; i < 32; i++) ppu_buffer[i] = ptr[i];
-}
-
 static void clear_palette(void) {
     PPUADDR(0x3f);
     PPUADDR(0x00);
@@ -275,12 +271,6 @@ static void ppu_update(byte amount) {
     ppu_ptr += amount;
 }
 
-static void setup_palette(const byte *palette) {
-    ppu_ptr = 0x3f00;
-    ppu_cpy(palette);
-    ppu_update(32);
-}
-
 static void wipe_palette(void) {
     ppu_ptr = 0x3f00;
     memset(ppu_buffer, 0x30, 32);
@@ -360,6 +350,14 @@ static const byte game_palette[] = {
     0x30, 0x2d, 0x3d, 0x0c,
 };
 
+static void setup_palette(void) {
+    ppu_ptr = 0x3f00;
+    for (byte i = 0; i < 32; i++) {
+	ppu_buffer[i] = game_palette[i];
+    }
+    ppu_update(32);
+}
+
 static void show_highscore_table(void) {
     byte i = 0;
     for (byte y = 0; y < 3; y++) {
@@ -375,8 +373,8 @@ static void show_highscore_table(void) {
 static void show_title_screen(void) {
     print_msg("RETRO ISTABA MINIFEST 2025", POS(3, 27));
     print_msg("RETNOTS", POS(13, 8));
-    setup_palette(game_palette);
     show_highscore_table();
+    setup_palette();
 }
 
 static byte head, tail;
@@ -687,7 +685,7 @@ static void enter_new_record_name(void) {
 static void stop_game(void) {
     wipe_screen();
     print_msg(finish_str(), POS(12, 12));
-    setup_palette(game_palette);
+    setup_palette();
     wait_some_button();
 }
 
