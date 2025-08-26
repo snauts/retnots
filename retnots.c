@@ -4,6 +4,7 @@ typedef unsigned short word;
 
 #define NULL ((void *) 0)
 
+#include "fonts.hdr"
 #include "slope.hdr"
 
 void sdcc_deps(void) __naked {
@@ -322,7 +323,7 @@ static void wait_some_button(void) {
 }
 
 static byte char_to_tile(char c) {
-    byte sym = c + 16;
+    byte sym = c + FONT_START;
     if (c == ' ') return 0;
     if (c >= '0' && c <= '9') {
 	return sym - '0';

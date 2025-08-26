@@ -342,8 +342,18 @@ static void generate_level_data(unsigned char *buf) {
     fclose(fp);
 }
 
+static void output_font_offset(void) {
+    int offset = tileset_size / 16;
+    FILE *fp = fopen("fonts.hdr", "w");
+    fprintf(fp, "#define FONT_START %d\n", offset);
+    fclose(fp);
+}
+
 static void save_tiles(unsigned char *buf) {
     load_tileset();
+    if (strcmp(file_name, "fonts.pcx") == 0) {
+	output_font_offset();
+    }
     if (option == 'l') {
 	generate_level_data(buf);
     }
