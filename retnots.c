@@ -409,7 +409,7 @@ static void reset_rows(void) {
 }
 
 static byte is_bottom(void) {
-    return *row_ptr == 0;
+    return head == tail && *row_ptr == 0;
 }
 
 static void update_row(void) {
