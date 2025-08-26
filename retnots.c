@@ -613,9 +613,13 @@ static void game_loop(void) {
     }
 }
 
+static const char *finish_str(void) {
+    return is_bottom() ? "GAME DONE" : "GAME OVER";
+}
+
 static void stop_game(void) {
     wipe_screen();
-    print_msg("GAME OVER", POS(12, 12));
+    print_msg(finish_str(), POS(12, 12));
     setup_palette(game_palette);
     wait_some_button();
 }
