@@ -25,7 +25,7 @@ void sdcc_deps(void) __naked {
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
     __asm__("_sound:		.ds 1");
-    __asm__("_falls:		.ds 1");
+    __asm__("_lives:		.ds 1");
     __asm__("_speed:		.ds 1");
     __asm__("_safe:		.ds 1");
     __asm__("_line:		.ds 1");
@@ -135,7 +135,7 @@ extern byte row_idx;
 extern byte pending;
 extern byte button;
 extern byte sound;
-extern byte falls;
+extern int8 lives;
 extern byte speed;
 extern byte line;
 extern byte bump;
@@ -183,7 +183,7 @@ static void reset_game(void) {
     line = 9;
     bump = 0;
     sound = 0;
-    falls = 0;
+    lives = 3;
     speed = 0;
     scroll = 0;
     button = 0;
@@ -432,6 +432,7 @@ static void produce_new_row(void) {
 	update_row();
 	pending--;
 	if (is_bottom()) {
+	    lives |= 0x80;
 	    speed = 0;
 	}
     }
@@ -456,7 +457,7 @@ static void sound_effect(void) {
 	NOISE_LO(0x0a);
 	NOISE_HI(0xf8);
 	NOISE_VL(sound--);
-	if (sound < 0x30) falls++;
+	if (sound < 0x30) lives--;
     }
     if (sound > 0x00 && sound < 0x10) {
 	TRI_LO(sfx[sound >> 2]);
@@ -484,7 +485,7 @@ static void get_score(byte amount) {
 }
 
 static void loose_live(void) {
-    oam[81 + (falls << 2)] = 0xff;
+    oam[77 + (lives << 2)] = 0xff;
     sound = 0x3f;
 }
 
@@ -554,9 +555,9 @@ static const byte score_img[] = {
     0x10,0x00,0x01,0x18,
     0x10,0x00,0x01,0x20,
 
-    0x10,0x0a,0x01,0xe0,
-    0x10,0x0a,0x01,0xe8,
     0x10,0x0a,0x01,0xf0,
+    0x10,0x0a,0x01,0xe8,
+    0x10,0x0a,0x01,0xe0,
 };
 
 static void show_score(void) {
@@ -601,7 +602,7 @@ static void check_controls(void) {
 
 static void game_loop(void) {
     wait_vblank();
-    while (falls <= 3) {
+    while (lives >= 0) {
 	wait_signal();
 	update_scroll();
 	prepare_readback();
