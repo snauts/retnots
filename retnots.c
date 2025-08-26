@@ -129,7 +129,7 @@ extern volatile byte control;
 extern volatile byte signal;
 extern volatile byte scroll;
 
-extern void* const *row_ptr;
+extern const byte *row_ptr;
 extern byte row_idx;
 extern byte pending;
 extern byte button;
@@ -378,12 +378,12 @@ static void show_title_screen(void) {
 }
 
 static void reset_rows(void) {
-    row_ptr = slope_addr;
+    row_ptr = slope;
     row_idx = 0;
 }
 
 static byte is_bottom(void) {
-    return !BYTE(*row_ptr, 1);
+    return row_ptr == (slope + SIZE(slope));
 }
 
 static void update_row(void) {
@@ -391,8 +391,9 @@ static void update_row(void) {
     BYTE(ppu_ptr, 0) = (i & 0xf0);
     BYTE(ppu_ptr, 1) = (i & 0x0f) | 0x20;
     row_idx = (row_idx + 1) & 0x3f;
-    ppu_cpy(*row_ptr++);
+    ppu_cpy(row_ptr);
     ppu_count = 32;
+    row_ptr += 32;
 }
 
 static void produce_new_row(void) {

@@ -292,52 +292,7 @@ static int generate_rows(unsigned char *rows, int attrs) {
     return i;
 }
 
-typedef unsigned char byte;
-
-static int search_dict(byte *ptr, byte *dict, int *size) {
-    int n = *size;
-    for (int i = 0; i <= n - 32; i++) {
-	if (memcmp(dict + i, ptr, 32) == 0) {
-	    return i;
-	}
-    }
-    memcpy(dict + n, ptr, 32);
-    *size = n + 32;
-    return n;
-}
-
-static int build_dict(byte *dict, int *addr, byte *tile, byte *attr, int n) {
-    int row = 0;
-    int size = 0;
-    while (n > 0) {
-	byte *ptr;;
-	byte i = row % 32;
-	if (i == 0x00 || i == 0x11) {
-	    ptr = attr;
-	    attr += 32;
-	}
-	else {
-	    ptr = tile;
-	    tile += 32;
-	    n = n - 32;
-	}
-	addr[row++] = search_dict(ptr, dict, &size);
-    }
-  stop:
-    addr[row] = -1;
-    return size;
-}
-
-static void format_addr_buffer(FILE *fp, const char *name, int *addr) {
-    int i = 0;
-    fprintf(fp, "static const void * const %s_addr[] = {\n", name);
-    while (*addr >= 0) {
-	fprintf(fp, " %s_dict+0x%04x,", name, *addr++);
-	if ((i++ & 3) == 3) fprintf(fp, "\n");
-    }
-    fprintf(fp, " NULL,\n");
-    fprintf(fp, "};\n");
-}
+int compress(void *dst, void *src, int size);
 
 static void generate_level_data(unsigned char *buf) {
     char name[256];
@@ -350,16 +305,30 @@ static void generate_level_data(unsigned char *buf) {
     int max_tiles = buf_size() / 64;
     unsigned char tile[max_tiles];
     unsigned char attr[max_tiles];
-    unsigned char dict[max_tiles];
 
-    int count = generate_data_map(buf, tile);
-    generate_attr_map(buf, attr);
+    int tile_count = generate_data_map(buf, tile);
+    int attr_count = generate_attr_map(buf, attr);
 
-    fprintf(fp, "static const byte %s_dict[] = {\n", name);
-    save_map(fp, dict, build_dict(dict, addr, tile, attr, count));
+    unsigned char data[2 * max_tiles];
+
+    int size = 0, chunk = 512;
+    unsigned char *pt = tile;
+    unsigned char *pa = attr;
+    void *copy_chunk(void *dst, void *src, int n) {
+	memcpy(dst + size, src, n);
+	size = size + n;
+	return src + n;
+    }
+    while (tile_count > 0) {
+	pa = copy_chunk(data, pa, 32);
+	pt = copy_chunk(data, pt, chunk);
+	tile_count -= chunk;
+	chunk = 960 - chunk;
+    }
+
+    fprintf(fp, "static const byte %s[] = {\n", name);
+    save_map(fp, data, size);
     fprintf(fp, "};\n");
-
-    format_addr_buffer(fp, name, addr);
 
     unsigned char row_table[64];
     fprintf(fp, "static const byte row_table[] = {\n");
