@@ -308,7 +308,7 @@ static byte check_button(void) {
     return press;
 }
 
-static void wait_some_button(void) {
+static void wait_button(void) {
     while (!(check_button() & BUTTON_SOME)) { }
 }
 
@@ -375,6 +375,7 @@ static void show_title_screen(void) {
     print_msg("RETNOTS", POS(13, 8));
     show_highscore_table();
     setup_palette();
+    wait_button();
 }
 
 static byte head, tail;
@@ -574,11 +575,11 @@ static void start_new_game(void) {
     reset_rows();
     show_score();
     animate_racoon(0);
-    for (byte i = 0; i < 40; i++) {
+    for (byte i = 0; i < 36; i++) {
 	update_row();
 	ppu_update(32);
     }
-    wait_some_button();
+    wait_button();
     speed = 1;
 }
 
@@ -682,11 +683,14 @@ static void enter_new_record_name(void) {
     }
 }
 
+static void victory_scene(void) {
+    if (is_bottom()) wait_button();
+}
+
 static void stop_game(void) {
-    wipe_screen();
     print_msg(finish_str(), POS(12, 12));
     setup_palette();
-    wait_some_button();
+    wait_button();
 }
 
 void game_startup(void) {
@@ -695,9 +699,10 @@ void game_startup(void) {
     for (;;) {
 	wipe_screen();
 	show_title_screen();
-	wait_some_button();
 	start_new_game();
 	game_loop();
+	victory_scene();
+	wipe_screen();
 	stop_game();
     }
 }
