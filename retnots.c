@@ -548,12 +548,12 @@ static void start_new_game(void) {
 static void check_controls(void) {
     check_button();
     byte i = bump ? 0x36 : 0x06;
-    if (button & BUTTON_RIGHT && pos < 240) {
-	pos = pos + 1;
+    if (button & BUTTON_RIGHT && pos < 236) {
+	pos = pos + speed;
 	i -= 3;
     }
-    else if (button & BUTTON_LEFT && pos > 8) {
-	pos = pos - 1;
+    else if (button & BUTTON_LEFT && pos > 12) {
+	pos = pos - speed;
 	i += 3;
     }
     if (bump == SPECIAL) {
