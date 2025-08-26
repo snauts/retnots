@@ -360,7 +360,7 @@ static const byte game_palette[] = {
 static void show_highscore_table(void) {
     byte i = 0;
     for (byte y = 0; y < 3; y++) {
-	ppu_ptr = 0x228a + (y << 6);
+	ppu_ptr = 0x222a + (y << 6);
 	for (byte x = 0; x < 13; x++) {
 	    byte spacing = (7 <= x && x <= 8);
 	    ppu_buffer[x] = spacing ? 0 : table[i++];
@@ -370,7 +370,8 @@ static void show_highscore_table(void) {
 }
 
 static void show_title_screen(void) {
-    print_msg("RETNOTS", POS(13, 12));
+    print_msg("RETRO ISTABA MINIFEST 2025", POS(3, 27));
+    print_msg("RETNOTS", POS(13, 8));
     setup_palette(game_palette);
     show_highscore_table();
 }
