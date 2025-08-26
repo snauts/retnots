@@ -112,7 +112,10 @@ void rst(void) __naked {
 #define BUTTON_LEFT	BIT(1)
 #define BUTTON_RIGHT	BIT(0)
 
-#define BUTTON_SOME	(BUTTON_START | BUTTON_LEFT | BUTTON_RIGHT)
+#define SKI_RIGHT	(BUTTON_RIGHT | BUTTON_A)
+#define SKI_LEFT	(BUTTON_LEFT  | BUTTON_B)
+
+#define BUTTON_SOME	(BUTTON_START | SKI_LEFT | SKI_RIGHT)
 
 #define HEIGHT		240
 #define SPECIAL 	10
@@ -584,11 +587,11 @@ static void start_new_game(void) {
 static void check_controls(void) {
     check_button();
     byte i = bump ? 0x36 : 0x06;
-    if (button & BUTTON_RIGHT && pos < 236) {
+    if (button & SKI_RIGHT && pos < 236) {
 	pos = pos + speed;
 	i -= 3;
     }
-    else if (button & BUTTON_LEFT && pos > 12) {
+    else if (button & SKI_LEFT && pos > 12) {
 	pos = pos - speed;
 	i += 3;
     }
