@@ -6,6 +6,7 @@ typedef unsigned short word;
 
 #include "fonts.hdr"
 #include "slope.hdr"
+#include "title.hdr"
 
 void sdcc_deps(void) __naked {
     __asm__(".area ZP (PAG)");
@@ -370,14 +371,6 @@ static void show_highscore_table(void) {
     }
 }
 
-static void show_title_screen(void) {
-    print_msg("RETRO ISTABA MINIFEST 2025", POS(3, 27));
-    print_msg("RETNOTS", POS(13, 8));
-    show_highscore_table();
-    setup_palette();
-    wait_button();
-}
-
 static byte head, tail;
 static byte window[256];
 
@@ -404,13 +397,6 @@ static void decompress(void) {
     }
 }
 
-static void reset_rows(void) {
-    row_ptr = slope;
-    row_idx = 0;
-    head = 0;
-    tail = 0;
-}
-
 static byte is_bottom(void) {
     return head == tail && *row_ptr == 0;
 }
@@ -425,6 +411,18 @@ static void update_row(void) {
 	ppu_buffer[i] = window[tail++];
     }
     ppu_count = 32;
+}
+
+static void reset_rows(const byte *ptr, byte n) {
+    row_ptr = ptr;
+    row_idx = 0;
+    head = 0;
+    tail = 0;
+
+    while (n-- > 0) {
+	update_row();
+	ppu_update(32);
+    }
 }
 
 static void produce_new_row(void) {
@@ -572,13 +570,9 @@ static void show_score(void) {
 static void start_new_game(void) {
     pos = 124;
     reset_game();
-    reset_rows();
     show_score();
+    reset_rows(slope, 36);
     animate_racoon(0);
-    for (byte i = 0; i < 36; i++) {
-	update_row();
-	ppu_update(32);
-    }
     wait_button();
     speed = 1;
 }
@@ -689,6 +683,14 @@ static void victory_scene(void) {
 
 static void stop_game(void) {
     print_msg(finish_str(), POS(12, 12));
+    setup_palette();
+    wait_button();
+}
+
+static void show_title_screen(void) {
+    print_msg("RETRO ISTABA MINIFEST 2025", POS(3, 27));
+    show_highscore_table();
+    reset_rows(title, 16);
     setup_palette();
     wait_button();
 }

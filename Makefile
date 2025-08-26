@@ -25,6 +25,7 @@ size:
 	./pcx-dump -t special.pcx
 	./pcx-dump -t fonts.pcx
 	./pcx-dump -l slope.pcx
+	./pcx-dump -l title.pcx
 	./pcx-dump -p tiles.chr
 	./pcx-dump -s sprites.pcx
 	echo Compile $(NAME).c
