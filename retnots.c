@@ -14,6 +14,7 @@ void sdcc_deps(void) __naked {
     __asm__("_ppu_read: 	.ds 2");
     __asm__("_ppu_count:	.ds 1");
     __asm__("_ppu_buffer:	.ds 32");
+    __asm__("_benchmark:	.ds 2");
     __asm__("_counter:		.ds 1");
     __asm__("_row_ptr:		.ds 2");
     __asm__("_row_idx:		.ds 1");
@@ -122,6 +123,7 @@ extern volatile word ppu_read;
 extern volatile byte ppu_count;
 extern volatile byte ppu_buffer[32];
 
+extern volatile word benchmark;
 extern volatile byte counter;
 extern volatile byte control;
 extern volatile byte signal;
@@ -149,7 +151,9 @@ static void wait_vblank(void) {
 
 static void wait_signal(void) {
     signal = 1;
-    while (signal) { }
+    word ticks = 0;
+    while (signal) { ticks++; }
+    if (benchmark > ticks) benchmark = ticks;
 }
 
 #define MEMSET(ptr, c, n) \
@@ -193,6 +197,7 @@ static byte char_to_tile(char c);
 static void init_memory(void) {
     counter = 0;
     ppu_count = 0;
+    benchmark = 0xffff;
 
     reset_game();
     wipe_sprites();
@@ -566,6 +571,7 @@ static void check_controls(void) {
 }
 
 static void game_loop(void) {
+    wait_vblank();
     while (falls <= 3) {
 	wait_signal();
 	update_scroll();
