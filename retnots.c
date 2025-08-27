@@ -772,8 +772,8 @@ static void show_title_screen(void) {
 
 static void play_melody(byte n, byte i) {
     i <<= 1;
-    MEM_WR(0x4002 | n, notes[i + 1]);
-    MEM_WR(0x4003 | n, notes[i + 0]);
+    MEM_WR(0x4002 | n, notes[i + 0]);
+    MEM_WR(0x4003 | n, notes[i + 1]);
 }
 
 static void play_drum(byte val) {
