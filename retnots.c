@@ -122,6 +122,8 @@ void rst(void) __naked {
 
 #define HEIGHT		240
 #define SPECIAL 	10
+#define NAME_SIZE	7
+#define ENTRY_SIZE	11
 
 extern byte oam[256];
 
@@ -660,11 +662,9 @@ static void display_char(byte *name, byte caret) {
     ppu_count = 1;
 }
 
-static char name[7];
-static void enter_new_record_name(void) {
+static void enter_new_record_name(byte *name) {
     byte caret = 0;
-
-    memset(name, 0, SIZE(name));
+    memset(name, 0, NAME_SIZE);
 
     for (;;) {
 	wait_signal();
@@ -676,10 +676,10 @@ static void enter_new_record_name(void) {
 	    break;
 	}
 	else if (state & SKI_LEFT) {
-	    caret = caret == 0 ? 6 : caret - 1;
+	    caret = caret == 0 ? (NAME_SIZE - 1) : caret - 1;
 	}
 	else if (state & SKI_RIGHT) {
-	    caret = caret == 6 ? 0 : caret + 1;
+	    caret = caret == (NAME_SIZE - 1) ? 0 : caret + 1;
 	}
 	else if (state & BUTTON_UP) {
 	    update_char(name + caret, 255);
@@ -692,9 +692,39 @@ static void enter_new_record_name(void) {
     }
 }
 
+static byte compare_score(byte *s1, byte *s2) {
+    for (byte i = 0; i < sizeof(score); i++) {
+	if (s1[i] > s2[i]) return 1;
+	if (s1[i] < s2[i]) return 0;
+    }
+    return 0;
+}
+
+static void move_scores_down(int8 n) {
+    for (int8 i = ENTRY_SIZE; i >= n; i -= ENTRY_SIZE) {
+	memcpy(table + i + ENTRY_SIZE, table + i, ENTRY_SIZE);
+    }
+}
+
+static void insert_score(byte *entry) {
+    memcpy(entry + NAME_SIZE, score, SIZE(score));
+    enter_new_record_name(entry);
+}
+
+static void update_table(void) {
+    for (int8 n = 0; n < 3 * ENTRY_SIZE; n += ENTRY_SIZE) {
+	byte *entry = table + n;
+	if (compare_score(score, entry + NAME_SIZE)) {
+	    move_scores_down(n);
+	    insert_score(entry);
+	    break;
+	}
+    }
+}
+
 static void copy_score_from_oam(void) {
     for (byte i = 0; i < SIZE(score); i++) {
-	score[i] = oam[65 + (i << 2)] + '0';
+	score[i] = oam[65 + (i << 2)] + FONT_START;
     }
 }
 
@@ -706,6 +736,7 @@ static void victory_scene(void) {
 static void stop_game(void) {
     print_msg(finish_str(), POS(12, 12));
     setup_palette();
+    update_table();
     wait_button();
 }
 
