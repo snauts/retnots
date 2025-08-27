@@ -783,17 +783,18 @@ static void play_melody(byte note) {
 }
 
 static void music_notes(void) {
-    byte cmd;
+    byte cmd, val;
     for (;;) {
 	cmd = melody[note++];
+	val = cmd & 0x3f;
 	switch (cmd & 0xc0) {
 	case 0x80:
 	    break;
 	case 0x40:
-	    play_melody(cmd & 0x3f);
+	    play_melody(val);
 	    break;
 	default:
-	    set_note_length(cmd);
+	    set_note_length(val);
 	    return;
 	}
     }
@@ -815,7 +816,7 @@ static void play_music(void) {
 	}
     }
     if (ticks < SIZE(envelope)) {
-	byte volume = envelope[ticks]
+	byte volume = envelope[ticks];
 	MEM_WR(0x4000, volume);
 	MEM_WR(0x4004, volume);
 	MEM_WR(0x4008, volume);
