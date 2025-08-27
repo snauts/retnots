@@ -765,7 +765,7 @@ static void show_title_screen(void) {
 }
 
 static void set_note_length(byte len) {
-    static const byte length[] = { 16, 32, 12, 24, 8, 16 };
+    static const byte length[] = { 18, 36, 16, 32, 14, 28, 12, 24 };
     time = length[(speed << 1) + len - 1];
 }
 
@@ -793,16 +793,23 @@ static void music_notes(void) {
     }
 }
 
+static const byte envelope[] = {
+    0x3e, 0x3f, 0x3e, 0x3c,
+    0x3a, 0x38, 0x36, 0x34,
+    0x33, 0x32, 0x31, 0x30,
+};
 static void play_music(void) {
     if (time-- == 0) {
+	ticks = 0;
 	music_notes();
 	if (!melody[note]) {
 	    note = 0;
 	}
     }
-    byte vol = 0x30 | (time < 0xf ? time : 0xf);
-    MEM_WR(0x4000, vol);
-    MEM_WR(0x4004, vol);
+    if (ticks < SIZE(envelope)) {
+	MEM_WR(0x4000, envelope[ticks]);
+    }
+    ticks++;
 }
 
 void game_startup(void) {
