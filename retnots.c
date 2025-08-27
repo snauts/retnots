@@ -29,6 +29,7 @@ void sdcc_deps(void) __naked {
     __asm__("_signal:		.ds 1");
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
+    __asm__("_ticks:		.ds 1");
     __asm__("_pages:		.ds 1");
     __asm__("_sound:		.ds 1");
     __asm__("_lives:		.ds 1");
@@ -154,6 +155,7 @@ extern byte pages;
 extern byte sound;
 extern int8 lives;
 extern byte speed;
+extern byte ticks;
 extern byte line;
 extern byte bump;
 extern int8 safe;
@@ -171,9 +173,9 @@ static void wait_vblank(void) {
 
 static void wait_signal(void) {
     signal = 1;
-    word ticks = 0;
-    while (signal) { ticks++; }
-    if (benchmark > ticks) benchmark = ticks;
+    word cycles = 0;
+    while (signal) { cycles++; }
+    if (benchmark > ticks) benchmark = cycles;
 }
 
 static void memset(byte *buf, byte val, byte count) {
