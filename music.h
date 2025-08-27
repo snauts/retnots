@@ -13,8 +13,10 @@
 #define As		NOTE(0xa)
 #define Bn		NOTE(0xb)
 
-static const byte chord_D[] = { 20, 60, 90 };
-static const byte chord_A[] = { 90, 130, 160 };
+static const byte chords[] = {
+    0x14, 0x3c, 0x5a, 0x00, // D Fs A
+    0x5a, 0x82, 0xa0, 0x00, // A Cs E
+};
 
 #define cD		0x80
 #define cA		0x81
