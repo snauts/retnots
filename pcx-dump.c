@@ -342,10 +342,6 @@ static void generate_level_data(unsigned char *buf) {
     save_map(fp, done, compress(done, data, size));
     fprintf(fp, "};\n");
 
-    if (strcmp(file_name, "slope.pcx") == 0) {
-	save_row_tables(fp);
-    }
-
     fclose(fp);
 }
 
@@ -370,6 +366,15 @@ static void save_tiles(unsigned char *buf) {
     save_tileset();
 }
 
+static int generate_tables(void) {
+    FILE *fp = fopen(file_name, "w");
+
+    save_row_tables(fp);
+
+    fclose(fp);
+    return 0;
+}
+
 int main(int argc, char **argv) {
     if (argc < 3) {
 	printf("USAGE: pcx-dump [option] file.pcx\n");
@@ -378,6 +383,7 @@ int main(int argc, char **argv) {
 	printf("  -l   save level\n");
 	printf("  -p   pad tiles\n");
 	printf("  -s   save sprites\n");
+	printf("  -g   generate tables\n");
 	return 0;
     }
 
@@ -391,6 +397,8 @@ int main(int argc, char **argv) {
 	return reset_tiles();
     case 'p':
 	return pad_tiles();
+    case 'g':
+	return generate_tables();
     }
 
     unsigned char *buf = read_pcx(file_name);

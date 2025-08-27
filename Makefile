@@ -27,6 +27,7 @@ size:
 	./pcx-dump -l slope.pcx
 	./pcx-dump -l title.pcx
 	./pcx-dump -p tiles.chr
+	./pcx-dump -g tables.hdr
 	./pcx-dump -s sprites.pcx
 	echo Compile $(NAME).c
 	sdcc -mmos6502 $(CFLAGS) $(NAME).c -c

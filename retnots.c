@@ -7,6 +7,7 @@ typedef unsigned short word;
 #include "fonts.hdr"
 #include "slope.hdr"
 #include "title.hdr"
+#include "tables.hdr"
 
 void sdcc_deps(void) __naked {
     __asm__(".area ZP (PAG)");
