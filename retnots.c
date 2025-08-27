@@ -818,7 +818,7 @@ static void play_music(void) {
     }
     for (byte i = 0; i < SIZE(ticks); i++) {
 	if (ticks[i]) {
-	    byte volume = envelope[ticks[i]--];
+	    byte volume = envelope[--ticks[i]];
 	    MEM_WR(0x4000 + (i << 2), volume);
 	}
     }
