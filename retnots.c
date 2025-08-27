@@ -15,15 +15,16 @@ void sdcc_deps(void) __naked {
     __asm__(".area ZP (PAG)");
     __asm__("REGTEMP:		.ds 8");
     __asm__("DPTR:		.ds 2");
+    __asm__("_control:		.ds 1");
+    __asm__("_benchmark:	.ds 2");
+    /* memset(0) from here */
+    __asm__("_counter:		.ds 1");
     __asm__("_ppu_ptr:		.ds 2");
     __asm__("_ppu_read: 	.ds 2");
     __asm__("_ppu_count:	.ds 1");
     __asm__("_ppu_buffer:	.ds 32");
-    __asm__("_benchmark:	.ds 2");
-    __asm__("_counter:		.ds 1");
     __asm__("_row_ptr:		.ds 2");
     __asm__("_row_idx:		.ds 1");
-    __asm__("_control:		.ds 1");
     __asm__("_pending:		.ds 1");
     __asm__("_signal:		.ds 1");
     __asm__("_button:		.ds 1");
@@ -38,6 +39,7 @@ void sdcc_deps(void) __naked {
     __asm__("_bump:		.ds 1");
     __asm__("_note:		.ds 1");
     __asm__("_time:		.ds 1");
+    /* memset(0) END */
     __asm__("_pos:		.ds 1");
 
     __asm__(".area OAM (PAG)");
@@ -196,25 +198,15 @@ static void wipe_sprites(void) {
 }
 
 static void reset_game(void) {
+    memset(&counter, 0, &pos - &counter);
+    lives = 3;
     safe = 9;
     line = 9;
-    bump = 0;
-    note = 0;
-    time = 0;
-    pages = 0;
-    sound = 0;
-    lives = 3;
-    speed = 0;
-    scroll = 0;
-    button = 0;
-    pending = 0;
 }
 
 static byte char_to_tile(char c);
 
 static void init_memory(void) {
-    counter = 0;
-    ppu_count = 0;
     benchmark = 0xffff;
 
     reset_game();
