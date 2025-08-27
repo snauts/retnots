@@ -1,4 +1,4 @@
-#define NOTE(p, l)	(l), (14 * (p))
+#define NOTE(p, l)	(l), (10 * p)
 #define DONE		NOTE(0, 0)
 
 #define C(l)		NOTE(0x0, l)
@@ -14,14 +14,32 @@
 #define a(l)		NOTE(0xa, l)
 #define B(l)		NOTE(0xb, l)
 
-static const byte melody[] = {
-    A(2), f(2),
-    A(2), f(2),
-    G(1), E(1), G(1), E(1),
-    f(2), f(2),
+static const byte chord_D[] = { 20, 60, 90 };
+static const byte chord_A[] = { 90, 130, 160 };
 
-    E(1), E(1), E(1), E(1),
-    f(1), f(1), f(1), f(1),
-    G(1), f(1), G(1), E(1),
-    D(1), D(1), D(2),
+#define cD		0x80
+#define cA		0x81
+
+static const byte melody[] = {
+    cD, A(2), f(2),
+        A(2), f(2),
+    cA, G(1), E(1), G(1), E(1),
+    cD, f(2), f(2),
+
+    cD, A(2), f(2),
+        A(2), f(2),
+    cA, G(1), E(1), G(1), E(1),
+    cD, f(2), f(2),
+
+    cA, E(1), E(1), E(1), E(1),
+    cD, f(1), f(1), f(1), f(1),
+    cA, G(1), f(1), G(1), E(1),
+    cD, D(1), D(1), D(2),
+
+    cA, E(1), E(1), E(1), E(1),
+    cD, f(1), f(1), f(1), f(1),
+    cA, G(1), f(1), G(1), E(1),
+    cD, D(1), D(1), D(2),
+
+    DONE,
 };
