@@ -762,13 +762,18 @@ static void show_title_screen(void) {
     wait_button();
 }
 
+static void set_note_length(byte len) {
+    static const byte length[] = { 16, 32, 12, 24, 8, 16 };
+    time = length[(speed << 1) + len - 1];
+}
+
 static void play_music(void) {
     if (time-- == 0) {
 	MEM_WR(0x4001, 0x8);
 	if (melody[note] & 0x80) {
 	    note++;
 	}
-	time = melody[note++] << 4;
+	set_note_length(melody[note++]);
 	byte i = melody[note++];
 	MEM_WR(0x4002, notes[i + 1]);
 	MEM_WR(0x4003, notes[i + 0]);
