@@ -1,8 +1,8 @@
 #define R(x)		(0xc0 | (x))
 #define N(p)		(0x40 | (4 * p))
 
-#define cD		(0x80 | (2 * 2))
-#define cA		(0x80 | (2 * 9))
+#define cD		(0x80 | (4 * 2))
+#define cA		(0x80 | (4 * 9))
 
 #define Cn		N(0x0)
 #define Cs		N(0x1)
