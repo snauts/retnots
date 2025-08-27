@@ -25,6 +25,7 @@ void sdcc_deps(void) __naked {
     __asm__("_signal:		.ds 1");
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
+    __asm__("_pages:		.ds 1");
     __asm__("_sound:		.ds 1");
     __asm__("_lives:		.ds 1");
     __asm__("_speed:		.ds 1");
@@ -138,6 +139,7 @@ extern const byte *row_ptr;
 extern byte row_idx;
 extern byte pending;
 extern byte button;
+extern byte pages;
 extern byte sound;
 extern int8 lives;
 extern byte speed;
@@ -182,6 +184,7 @@ static void reset_game(void) {
     safe = 9;
     line = 9;
     bump = 0;
+    pages = 0;
     sound = 0;
     lives = 3;
     speed = 0;
@@ -427,7 +430,10 @@ static void reset_rows(const byte *ptr, byte n) {
 
 static void produce_new_row(void) {
     byte i = row_table[row_idx];
-    if ((i & 0xc3) == 0xc3) pending++;
+    if ((i & 0xc3) == 0xc3) {
+	pending++;
+	pages++;
+    }
 
     if (pending > 0) {
 	update_row();
@@ -599,6 +605,10 @@ static void check_controls(void) {
     animate_racoon(i);
 }
 
+static void progression(void) {
+    if (pages == 9) speed = 2;
+}
+
 static void game_loop(void) {
     wait_vblank();
     while (lives >= 0) {
@@ -609,6 +619,7 @@ static void game_loop(void) {
 	check_controls();
 	animate_score();
 	sound_effect();
+	progression();
     }
 }
 
