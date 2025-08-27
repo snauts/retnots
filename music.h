@@ -13,34 +13,31 @@
 #define As		NOTE(0xa)
 #define Bn		NOTE(0xb)
 
-static const byte chords[] = {
-    0x14, 0x3c, 0x5a, 0x00, // D Fs A
-    0x5a, 0x82, 0xa0, 0x00, // A Cs E
-};
+#define cD		(0x80 | (5 * 2))
+#define cA		(0x80 | (5 * 9))
 
-#define cD		0x80
-#define cA		0x81
+#define R(x)		(0xc0 | (x))
 
 static const byte melody[] = {
-    cD, An, 2, Fs, 2,
-        An, 2, Fs, 2,
-    cA, Gn, 1, En, 1, Gn, 1, En, 1,
-    cD, Fs, 2, Fs, 2,
+    cD, An, R(0), 24,               Fs, R(9), 24,
+        An, R(0), 24,               Fs, R(9), 24,
+    cA, Gn, R(0), 12, En,       12, Gn, R(9), 12, En,       12,
+    cD, Fs, R(0), 24,               Fs, R(9), 24,
 
-    cD, An, 2, Fs, 2,
-        An, 2, Fs, 2,
-    cA, Gn, 1, En, 1, Gn, 1, En, 1,
-    cD, Fs, 2, Fs, 2,
+    cD, An, R(0), 24,               Fs, R(9), 24,
+        An, R(0), 24,               Fs, R(9), 24,
+    cA, Gn, R(0), 12, En,       12, Gn, R(9), 12, En,       12,
+    cD, Fs, R(0), 24,               Fs, R(9), 24,
 
-    cA, En, 1, En, 1, En, 1, En, 1,
-    cD, Fs, 1, Fs, 1, Fs, 1, Fs, 1,
-    cA, Gn, 1, Fs, 1, Gn, 1, En, 1,
-    cD, Dn, 1, Dn, 1, Dn, 2,
+    cA, En, R(0), 12, En, R(9), 12, En, R(0), 12, En, R(9), 12,
+    cD, Fs, R(0), 12, Fs, R(9), 12, Fs, R(0), 12, Fs, R(9), 12,
+    cA, Gn, R(0), 12, Fs, R(9), 12, Gn, R(0), 12, En, R(9), 12,
+    cD, Dn, R(0), 12, Dn, R(9), 12, Dn, R(9), 24,
 
-    cA, En, 1, En, 1, En, 1, En, 1,
-    cD, Fs, 1, Fs, 1, Fs, 1, Fs, 1,
-    cA, Gn, 1, Fs, 1, Gn, 1, En, 1,
-    cD, Dn, 1, Dn, 1, Dn, 2,
+    cA, En, R(0), 12, En, R(9), 12, En, R(0), 12, En, R(9), 12,
+    cD, Fs, R(0), 12, Fs, R(9), 12, Fs, R(0), 12, Fs, R(9), 12,
+    cA, Gn, R(0), 12, Fs, R(9), 12, Gn, R(0), 12, En, R(9), 12,
+    cD, Dn, R(0), 12, Dn, R(9), 12, Dn, R(9), 24,
 
     0,
 };

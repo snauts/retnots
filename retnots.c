@@ -770,16 +770,15 @@ static void show_title_screen(void) {
     wait_button();
 }
 
-static void set_note_length(byte len) {
-    static const byte length[] = { 18, 36, 16, 32, 14, 28, 12, 24 };
-    time = length[(speed << 1) + len - 1];
+static void play_melody(byte n, byte i) {
+    i <<= 1;
+    MEM_WR(0x4002 | n, notes[i + 1]);
+    MEM_WR(0x4003 | n, notes[i + 0]);
 }
 
-static void play_melody(byte note) {
-    note <<= 1;
-    MEM_WR(0x4002, notes[note + 1]);
-    MEM_WR(0x4003, notes[note + 0]);
-    flags |= BIT(0);
+static void play_drum(byte val) {
+    NOISE_LO(val);
+    NOISE_HI(0xf8);
 }
 
 static void music_notes(void) {
@@ -788,13 +787,20 @@ static void music_notes(void) {
 	cmd = melody[note++];
 	val = cmd & 0x3f;
 	switch (cmd & 0xc0) {
-	case 0x80:
-	    break;
 	case 0x40:
-	    play_melody(val);
+	    play_melody(0, val);
+	    flags |= BIT(0);
+	    break;
+	case 0x80:
+	    play_melody(4, val);
+	    flags |= BIT(1);
+	    break;
+	case 0xC0:
+	    play_drum(val);
+	    flags |= BIT(3);
 	    break;
 	default:
-	    set_note_length(val);
+	    time = val;
 	    return;
 	}
     }
@@ -810,16 +816,15 @@ static void play_music(void) {
 	ticks = 0;
 	flags = 0;
 	music_notes();
-	SND_CHN(flags);
 	if (!melody[note]) {
 	    note = 0;
 	}
     }
     if (ticks < SIZE(envelope)) {
 	byte volume = envelope[ticks];
-	MEM_WR(0x4000, volume);
-	MEM_WR(0x4004, volume);
-	MEM_WR(0x4008, volume);
+	if (flags & BIT(0)) MEM_WR(0x4000, volume);
+	if (flags & BIT(1)) MEM_WR(0x4004, volume);
+	if (flags & BIT(3)) MEM_WR(0x400C, volume);
     }
     ticks++;
 }
