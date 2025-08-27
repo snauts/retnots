@@ -30,6 +30,7 @@ void sdcc_deps(void) __naked {
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
     __asm__("_ticks:		.ds 1");
+    __asm__("_flags:		.ds 1");
     __asm__("_pages:		.ds 1");
     __asm__("_sound:		.ds 1");
     __asm__("_lives:		.ds 1");
@@ -156,6 +157,7 @@ extern byte sound;
 extern int8 lives;
 extern byte speed;
 extern byte ticks;
+extern byte flags;
 extern byte line;
 extern byte bump;
 extern int8 safe;
@@ -278,6 +280,10 @@ static void hw_init(void) {
     clear_palette();
     wait_vblank();
     ppu_ctrl();
+
+    /* enable pulse */
+    MEM_WR(0x4001, 0x08);
+    MEM_WR(0x4005, 0x08);
 }
 
 static void ppu_update(byte amount) {
@@ -771,9 +777,9 @@ static void set_note_length(byte len) {
 
 static void play_melody(byte note) {
     note <<= 1;
-    MEM_WR(0x4001, 0x08);
     MEM_WR(0x4002, notes[note + 1]);
     MEM_WR(0x4003, notes[note + 0]);
+    flags |= BIT(0);
 }
 
 static void music_notes(void) {
@@ -801,13 +807,18 @@ static const byte envelope[] = {
 static void play_music(void) {
     if (time-- == 0) {
 	ticks = 0;
+	flags = 0;
 	music_notes();
+	SND_CHN(flags);
 	if (!melody[note]) {
 	    note = 0;
 	}
     }
     if (ticks < SIZE(envelope)) {
-	MEM_WR(0x4000, envelope[ticks]);
+	byte volume = envelope[ticks]
+	MEM_WR(0x4000, volume);
+	MEM_WR(0x4004, volume);
+	MEM_WR(0x4008, volume);
     }
     ticks++;
 }
