@@ -718,6 +718,8 @@ static void move_scores_down(int8 n) {
 }
 
 static void insert_score(byte *entry) {
+    print_msg("CONGRATULATIONS", POS(9, 10));
+    print_msg("ENTER YOUR NAME", POS(9, 12));
     memcpy(entry + NAME_SIZE, score, SIZE(score));
     enter_new_record_name(entry);
 }
@@ -726,6 +728,8 @@ static void update_table(void) {
     for (int8 n = 0; n < 3 * ENTRY_SIZE; n += ENTRY_SIZE) {
 	byte *entry = table + n;
 	if (compare_score(score, entry + NAME_SIZE)) {
+	    wipe_screen();
+	    setup_palette();
 	    move_scores_down(n);
 	    insert_score(entry);
 	    break;
@@ -747,7 +751,6 @@ static void victory_scene(void) {
 static void stop_game(void) {
     print_msg(finish_str(), POS(12, 12));
     setup_palette();
-    update_table();
     wait_button();
 }
 
@@ -767,6 +770,7 @@ void game_startup(void) {
 	start_new_game();
 	game_loop();
 	victory_scene();
+	update_table();
 	wipe_screen();
 	stop_game();
     }
