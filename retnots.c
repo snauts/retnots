@@ -29,6 +29,7 @@ void sdcc_deps(void) __naked {
     __asm__("_sound:		.ds 1");
     __asm__("_lives:		.ds 1");
     __asm__("_speed:		.ds 1");
+    __asm__("_score:		.ds 4");
     __asm__("_safe:		.ds 1");
     __asm__("_line:		.ds 1");
     __asm__("_bump:		.ds 1");
@@ -136,6 +137,7 @@ extern volatile byte signal;
 extern volatile byte scroll;
 
 extern const byte *row_ptr;
+extern byte score[4];
 extern byte row_idx;
 extern byte pending;
 extern byte button;
@@ -690,8 +692,15 @@ static void enter_new_record_name(void) {
     }
 }
 
+static void copy_score_from_oam(void) {
+    for (byte i = 0; i < SIZE(score); i++) {
+	score[i] = oam[65 + (i << 2)] + '0';
+    }
+}
+
 static void victory_scene(void) {
     if (is_bottom()) wait_button();
+    copy_score_from_oam();
 }
 
 static void stop_game(void) {
