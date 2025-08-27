@@ -152,7 +152,7 @@ extern byte bump;
 extern int8 safe;
 extern byte pos;
 
-static const char default_table[] = "HORACE 0300JENOTS 0200ARCHIE 0100";
+static const char default_table[] = "HORACE.0300JENOTS.0200ARCHIE.0100";
 
 static byte table[sizeof(default_table)];
 
@@ -324,9 +324,15 @@ static void wait_button(void) {
     while (!(check_button() & BUTTON_SOME)) { }
 }
 
+static const char special[] = ".";
+
 static byte char_to_tile(char c) {
     byte sym = c + FONT_START;
     if (c == ' ') return 0;
+    for (byte i = 0; i < sizeof(special) - 1; i++) {
+	if (special[i] == c) return sym - c;
+	sym++;
+    }
     if (c >= '0' && c <= '9') {
 	return sym - '0';
     }
@@ -724,7 +730,7 @@ static void update_table(void) {
 
 static void copy_score_from_oam(void) {
     for (byte i = 0; i < SIZE(score); i++) {
-	score[i] = oam[65 + (i << 2)] + FONT_START;
+	score[i] = char_to_tile(oam[65 + (i << 2)] + '0');
     }
 }
 
