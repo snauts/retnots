@@ -29,12 +29,11 @@ void sdcc_deps(void) __naked {
     __asm__("_signal:		.ds 1");
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
-    __asm__("_ticks:		.ds 1");
-    __asm__("_flags:		.ds 1");
     __asm__("_pages:		.ds 1");
     __asm__("_sound:		.ds 1");
     __asm__("_lives:		.ds 1");
     __asm__("_speed:		.ds 1");
+    __asm__("_ticks:		.ds 4");
     __asm__("_score:		.ds 4");
     __asm__("_safe:		.ds 1");
     __asm__("_line:		.ds 1");
@@ -149,6 +148,7 @@ extern volatile byte scroll;
 
 extern const byte *row_ptr;
 extern byte score[4];
+extern byte ticks[4];
 extern byte row_idx;
 extern byte pending;
 extern byte button;
@@ -156,8 +156,6 @@ extern byte pages;
 extern byte sound;
 extern int8 lives;
 extern byte speed;
-extern byte ticks;
-extern byte flags;
 extern byte line;
 extern byte bump;
 extern int8 safe;
@@ -789,15 +787,15 @@ static void music_notes(void) {
 	switch (cmd & 0xc0) {
 	case 0x40:
 	    play_melody(0, val);
-	    flags |= BIT(0);
+	    ticks[0] = 12;
 	    break;
 	case 0x80:
 	    play_melody(4, val);
-	    flags |= BIT(1);
+	    ticks[1] = 12;
 	    break;
 	case 0xC0:
 	    play_drum(val);
-	    flags |= BIT(3);
+	    ticks[3] = 12;
 	    break;
 	default:
 	    time = val;
@@ -807,26 +805,23 @@ static void music_notes(void) {
 }
 
 static const byte envelope[] = {
-    0x3e, 0x3f, 0x3e, 0x3c,
-    0x3a, 0x38, 0x36, 0x34,
-    0x33, 0x32, 0x31, 0x30,
+    0x30, 0x31, 0x32, 0x33,
+    0x34, 0x36, 0x38, 0x3a,
+    0x3c, 0x3e, 0x3f, 0x3e,
 };
 static void play_music(void) {
     if (time-- == 0) {
-	ticks = 0;
-	flags = 0;
 	music_notes();
 	if (!melody[note]) {
 	    note = 0;
 	}
     }
-    if (ticks < SIZE(envelope)) {
-	byte volume = envelope[ticks];
-	if (flags & BIT(0)) MEM_WR(0x4000, volume);
-	if (flags & BIT(1)) MEM_WR(0x4004, volume);
-	if (flags & BIT(3)) MEM_WR(0x400C, volume);
+    for (byte i = 0; i < SIZE(ticks); i++) {
+	if (ticks[i]) {
+	    byte volume = envelope[ticks[i]--];
+	    MEM_WR(0x4000 + (i << 2), volume);
+	}
     }
-    ticks++;
 }
 
 void game_startup(void) {
