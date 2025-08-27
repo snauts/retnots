@@ -767,17 +767,36 @@ static void set_note_length(byte len) {
     time = length[(speed << 1) + len - 1];
 }
 
+static void play_melody(byte note) {
+    note <<= 1;
+    MEM_WR(0x4001, 0x08);
+    MEM_WR(0x4002, notes[note + 1]);
+    MEM_WR(0x4003, notes[note + 0]);
+}
+
+static void music_notes(void) {
+    byte cmd;
+    for (;;) {
+	cmd = melody[note++];
+	switch (cmd & 0xc0) {
+	case 0x80:
+	    break;
+	case 0x40:
+	    play_melody(cmd & 0x3f);
+	    break;
+	default:
+	    set_note_length(cmd);
+	    return;
+	}
+    }
+}
+
 static void play_music(void) {
     if (time-- == 0) {
-	MEM_WR(0x4001, 0x8);
-	if (melody[note] & 0x80) {
-	    note++;
+	music_notes();
+	if (!melody[note]) {
+	    note = 0;
 	}
-	set_note_length(melody[note++]);
-	byte i = melody[note++];
-	MEM_WR(0x4002, notes[i + 1]);
-	MEM_WR(0x4003, notes[i + 0]);
-	if (melody[note] == 0) note = 0;
     }
     byte vol = 0x30 | (time < 0xf ? time : 0xf);
     MEM_WR(0x4000, vol);

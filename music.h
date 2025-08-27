@@ -1,5 +1,4 @@
-#define NOTE(p, l)	(l), (10 * p)
-#define DONE		NOTE(0, 0)
+#define NOTE(p, l)	(0x40 | (5 * p)), (l)
 
 #define C(l)		NOTE(0x0, l)
 #define c(l)		NOTE(0x1, l)
@@ -9,7 +8,7 @@
 #define F(l)		NOTE(0x5, l)
 #define f(l)		NOTE(0x6, l)
 #define G(l)		NOTE(0x7, l)
-#define Gs(l)		NOTE(0x8, l)
+#define g(l)		NOTE(0x8, l)
 #define A(l)		NOTE(0x9, l)
 #define a(l)		NOTE(0xa, l)
 #define B(l)		NOTE(0xb, l)
@@ -41,5 +40,5 @@ static const byte melody[] = {
     cA, G(1), f(1), G(1), E(1),
     cD, D(1), D(1), D(2),
 
-    DONE,
+    0,
 };
