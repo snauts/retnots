@@ -169,6 +169,10 @@ static void memset(byte *buf, byte val, byte count) {
     while (count-- > 0) { *buf++ = val; }
 }
 
+static void memcpy(byte *dst, byte *src, byte count) {
+    while (count-- > 0) { *dst++ = *src++; }
+}
+
 static void clear_palette(void) {
     PPUADDR(0x3f);
     PPUADDR(0x00);
@@ -358,9 +362,7 @@ static const byte game_palette[] = {
 
 static void setup_palette(void) {
     ppu_ptr = 0x3f00;
-    for (byte i = 0; i < 32; i++) {
-	ppu_buffer[i] = game_palette[i];
-    }
+    memcpy(ppu_buffer, game_palette, 32);
     ppu_update(32);
 }
 
@@ -570,9 +572,7 @@ static const byte score_img[] = {
 };
 
 static void show_score(void) {
-    for (byte i = 0; i < SIZE(score_img); i++) {
-	oam[64 + i] = score_img[i];
-    }
+    memcpy(oam + 64, score_img, SIZE(score_img));
 }
 
 static void start_new_game(void) {
