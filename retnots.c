@@ -9,6 +9,8 @@ typedef unsigned short word;
 #include "title.hdr"
 #include "tables.hdr"
 
+#include "music.h"
+
 void sdcc_deps(void) __naked {
     __asm__(".area ZP (PAG)");
     __asm__("REGTEMP:		.ds 8");
