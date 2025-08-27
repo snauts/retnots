@@ -175,7 +175,7 @@ static void wait_signal(void) {
     signal = 1;
     word cycles = 0;
     while (signal) { cycles++; }
-    if (benchmark > ticks) benchmark = cycles;
+    if (benchmark > cycles) benchmark = cycles;
 }
 
 static void memset(byte *buf, byte val, byte count) {
