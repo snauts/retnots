@@ -36,6 +36,8 @@ void sdcc_deps(void) __naked {
     __asm__("_safe:		.ds 1");
     __asm__("_line:		.ds 1");
     __asm__("_bump:		.ds 1");
+    __asm__("_note:		.ds 1");
+    __asm__("_time:		.ds 1");
     __asm__("_pos:		.ds 1");
 
     __asm__(".area OAM (PAG)");
@@ -153,6 +155,8 @@ extern byte speed;
 extern byte line;
 extern byte bump;
 extern int8 safe;
+extern byte note;
+extern byte time;
 extern byte pos;
 
 static const char default_table[] = "HORACE.0300JENOTS.0200ARCHIE.0100";
@@ -195,6 +199,8 @@ static void reset_game(void) {
     safe = 9;
     line = 9;
     bump = 0;
+    note = 0;
+    time = 0;
     pages = 0;
     sound = 0;
     lives = 3;
@@ -762,6 +768,23 @@ static void show_title_screen(void) {
     show_highscore_table();
     setup_palette();
     wait_button();
+}
+
+static void play_music(void) {
+    if (time-- == 0) {
+	MEM_WR(0x4001, 0x8);
+	if (melody[note] & 0x80) {
+	    note++;
+	}
+	time = melody[note++] << 4;
+	byte i = melody[note++];
+	MEM_WR(0x4002, notes[i + 1]);
+	MEM_WR(0x4003, notes[i + 0]);
+	if (melody[note] == 0) note = 0;
+    }
+    byte vol = 0x30 | (time < 0xf ? time : 0xf);
+    MEM_WR(0x4000, vol);
+    MEM_WR(0x4004, vol);
 }
 
 void game_startup(void) {
