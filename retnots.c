@@ -324,7 +324,7 @@ static void wait_button(void) {
     while (!(check_button() & BUTTON_SOME)) { }
 }
 
-static const char special[] = ".";
+static const char special[] = ".!?";
 
 static byte char_to_tile(char c) {
     byte sym = c + FONT_START;
