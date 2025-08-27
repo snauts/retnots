@@ -380,7 +380,7 @@ static void show_highscore_table(void) {
 	ppu_ptr = POS(10, 17) + (y << 6);
 	for (byte x = 0; x < 13; x++) {
 	    byte spacing = (7 <= x && x <= 8);
-	    ppu_buffer[x] = spacing ? 0 : table[i++];
+	    ppu_buffer[x] = spacing ? char_to_tile('.') : table[i++];
 	}
 	ppu_update(13);
     }
@@ -651,14 +651,15 @@ static void update_char(byte *ptr, byte dir) {
     *ptr += dir;
     byte A = char_to_tile('A');
     byte Z = char_to_tile('Z');
-    if (*ptr == 1) {
+    byte D = char_to_tile('.');
+    if (*ptr == D + 1) {
 	*ptr = A;
     }
-    else if (*ptr == 255) {
+    else if (*ptr == D - 1) {
 	*ptr = Z;
     }
     else if (*ptr < A || *ptr > Z) {
-	*ptr = 0;
+	*ptr = D;
     }
 }
 
@@ -670,7 +671,11 @@ static void display_char(byte *name, byte caret) {
 
 static void enter_new_record_name(byte *name) {
     byte caret = 0;
-    memset(name, 0, NAME_SIZE);
+
+    memset(name, char_to_tile('.'), NAME_SIZE);
+    memcpy(ppu_buffer, name, NAME_SIZE);
+    ppu_ptr = POS(ENTER_X, ENTER_Y);
+    ppu_count = NAME_SIZE;
 
     for (;;) {
 	wait_signal();
