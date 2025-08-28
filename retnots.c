@@ -41,6 +41,7 @@ void sdcc_deps(void) __naked {
     __asm__("_bump:		.ds 1");
     __asm__("_drum:		.ds 1");
     __asm__("_note:		.ds 1");
+    __asm__("_skip:		.ds 1");
     __asm__("_time:		.ds 1");
     /* memset(0) END */
     __asm__("_pos:		.ds 1");
@@ -163,6 +164,7 @@ extern byte line;
 extern byte bump;
 extern int8 safe;
 extern byte drum;
+extern byte skip;
 extern byte note;
 extern byte time;
 extern byte pos;
@@ -842,12 +844,23 @@ static void set_volume(void) {
     }
 }
 
+static void rewind_music(void) {
+    if (melody[note] == REWIND) {
+	if  (skip < note++) {
+	    byte next = note;
+	    note = skip;
+	    skip = next;
+	}
+    }
+}
+
 static void play_music(void) {
     drum_hits();
     if (time == 0) {
 	music_notes();
+	rewind_music();
 	if (!melody[note]) {
-	    note = 0;
+	    skip = note = 0;
 	}
     }
     set_volume();
