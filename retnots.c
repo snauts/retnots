@@ -824,12 +824,13 @@ static void stop_music(void) {
 }
 
 static void play_music(void) {
-    if (time-- == 0) {
+    if (time == 0) {
 	music_notes();
 	if (!melody[note]) {
 	    note = 0;
 	}
     }
+    time--;
     for (byte i = 0; i < SIZE(ticks); i++) {
 	if (ticks[i]) {
 	    byte volume = envelope[--ticks[i]];
