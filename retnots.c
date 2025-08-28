@@ -797,7 +797,7 @@ static void drum_hits(void) {
 	drum = 24;
     }
     else if (drum == 12) {
-	play_drum(9);
+	play_drum(3);
     }
     drum--;
 }
