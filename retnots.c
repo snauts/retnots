@@ -167,6 +167,9 @@ static const char default_table[] = "HORACE.0300JENOTS.0200ARCHIE.0100";
 
 static byte table[sizeof(default_table)];
 
+static void play_music(void);
+static byte char_to_tile(char c);
+
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
 }
@@ -205,8 +208,6 @@ static void reset_game(void) {
     safe = 9;
     line = 9;
 }
-
-static byte char_to_tile(char c);
 
 static void init_memory(void) {
     benchmark = 0xffff;
@@ -638,6 +639,7 @@ static void game_loop(void) {
 	animate_score();
 	sound_effect();
 	progression();
+	play_music();
     }
 }
 
@@ -812,6 +814,13 @@ static const byte envelope[] = {
     0x34, 0x36, 0x38, 0x3a,
     0x3c, 0x3e, 0x3f, 0x3e,
 };
+
+static void stop_music(void) {
+    for (byte reg = 0; reg < 0x10; reg += 4) {
+	MEM_WR(0x4000 | reg, 0);
+    }
+}
+
 static void play_music(void) {
     if (time-- == 0) {
 	music_notes();
@@ -835,6 +844,7 @@ void game_startup(void) {
 	show_title_screen();
 	start_new_game();
 	game_loop();
+	stop_music();
 	victory_scene();
 	update_table();
 	wipe_screen();
