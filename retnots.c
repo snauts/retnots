@@ -480,6 +480,7 @@ static void sound_effect(void) {
 	0x35, 0x47, 0x54, 0x6a,
     };
     if (sound >= 0x30) {
+	ticks[3] = 0;
 	NOISE_LO(0x0a);
 	NOISE_HI(0xf8);
 	NOISE_VL(sound--);
@@ -775,8 +776,11 @@ static void play_melody(byte n, byte i) {
 }
 
 static void play_drum(byte val) {
-    NOISE_LO(val);
-    NOISE_HI(0xf8);
+    if (sound < 0x30) {
+	NOISE_LO(val);
+	NOISE_HI(0xf8);
+	ticks[3] = 12;
+    }
 }
 
 static void music_notes(void) {
@@ -795,7 +799,6 @@ static void music_notes(void) {
 	    break;
 	case 0xC0:
 	    play_drum(val);
-	    ticks[3] = 12;
 	    break;
 	default:
 	    time = val;
