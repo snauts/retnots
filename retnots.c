@@ -39,6 +39,7 @@ void sdcc_deps(void) __naked {
     __asm__("_safe:		.ds 1");
     __asm__("_line:		.ds 1");
     __asm__("_bump:		.ds 1");
+    __asm__("_drum:		.ds 1");
     __asm__("_note:		.ds 1");
     __asm__("_time:		.ds 1");
     /* memset(0) END */
@@ -161,6 +162,7 @@ extern byte speed;
 extern byte line;
 extern byte bump;
 extern int8 safe;
+extern byte drum;
 extern byte note;
 extern byte time;
 extern byte pos;
@@ -787,6 +789,17 @@ static void play_drum(byte val) {
     }
 }
 
+static void drum_hits(void) {
+    if (drum == 0) {
+	play_drum(0);
+	drum = 24;
+    }
+    else if (drum == 12) {
+	play_drum(9);
+    }
+    drum--;
+}
+
 static void music_notes(void) {
     byte cmd, val;
     for (;;) {
@@ -800,9 +813,6 @@ static void music_notes(void) {
 	case 0x80:
 	    play_melody(4, val);
 	    ticks[1] = 12;
-	    break;
-	case 0xC0:
-	    play_drum(val);
 	    break;
 	default:
 	    time = val;
@@ -823,20 +833,25 @@ static void stop_music(void) {
     }
 }
 
-static void play_music(void) {
-    if (time == 0) {
-	music_notes();
-	if (!melody[note]) {
-	    note = 0;
-	}
-    }
-    time--;
+static void set_volume(void) {
     for (byte i = 0; i < SIZE(ticks); i++) {
 	if (ticks[i]) {
 	    byte volume = envelope[--ticks[i]];
 	    MEM_WR(0x4000 + (i << 2), volume);
 	}
     }
+}
+
+static void play_music(void) {
+    drum_hits();
+    if (time == 0) {
+	music_notes();
+	if (!melody[note]) {
+	    note = 0;
+	}
+    }
+    set_volume();
+    time--;
 }
 
 void game_startup(void) {

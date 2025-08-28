@@ -1,4 +1,3 @@
-#define R(x)		(0xc0 | (x))
 #define N(p)		(0x40 | (4 * p))
 
 #define cD		(0x80 | (4 * 2))
@@ -21,24 +20,24 @@
 #define Bn		N(0xb)
 
 static const byte melody[] = {
-    cD, An, R(0), 3, cFs, 3, cA, 6,     R(9), 12, Fs, R(0), 12,     R(9), 12,
-        An, R(0),               12,     R(9), 12, Fs, R(0), 12,     R(9), 12,
-    cA, Gn, R(0), 3, cCs, 3, cE, 6, En, R(9), 12, En, R(0), 12, Gn, R(9), 12,
-    cD, Fs, R(0), 3, cFs, 3, cA, 6,     R(9), 12, Fs, R(0), 12,     R(9), 12,
+    cD, An, 3, cFs, 3, cA, 18, Fs, 24,
+        An,                24, Fs, 24,
+    cA, Gn, 3, cCs, 3, cE,  6, En, 12, En, 12, Gn, 12,
+    cD, Fs, 3, cFs, 3, cA, 18, Fs, 24,
 
-    cD, An, R(0), 3, cFs, 3, cA, 6,     R(9), 12, Fs, R(0), 12,     R(9), 12,
-        An, R(0),               12,     R(9), 12, Fs, R(0), 12,     R(9), 12,
-    cA, Gn, R(0), 3, cCs, 3, cE, 6, En, R(9), 12, En, R(0), 12, Gn, R(9), 12,
-    cD, Fs, R(0), 3, cFs, 3, cA, 6,     R(9), 12, Fs, R(0), 12,     R(9), 12,
+    cD, An, 3, cFs, 3, cA, 18, Fs, 24,
+        An,                24, Fs, 24,
+    cA, Gn, 3, cCs, 3, cE,  6, En, 12, En, 12, Gn, 12,
+    cD, Fs, 3, cFs, 3, cA, 18, Fs, 24,
 
-    cA, En, R(0), 3, cCs, 3, cE, 6, En, R(9), 12, En, R(0), 12, En, R(9), 12,
-    cD, Fs, R(0), 3, cFs, 3, cA, 6, Fs, R(9), 12, Fs, R(0), 12, Fs, R(9), 12,
-    cA, Gn, R(0), 3, cCs, 3, cE, 6, Fs, R(9), 12, Gn, R(0), 12, En, R(9), 12,
-    cD, Dn, R(0), 3, cFs, 3, cA, 6, Dn, R(9), 12, Dn, R(0), 12,     R(9), 12,
+    cA, En, 3, cCs, 3, cE, 6, En, 12, En, 12, En, 12,
+    cD, Fs, 3, cFs, 3, cA, 6, Fs, 12, Fs, 12, Fs, 12,
+    cA, Gn, 3, cCs, 3, cE, 6, Fs, 12, Gn, 12, En, 12,
+    cD, Dn, 3, cFs, 3, cA, 6, Dn, 12, Dn, 24,
 
-    cA, En, R(0), 3, cCs, 3, cE, 6, En, R(9), 12, En, R(0), 12, En, R(9), 12,
-    cD, Fs, R(0), 3, cFs, 3, cA, 6, Fs, R(9), 12, Fs, R(0), 12, Fs, R(9), 12,
-    cA, Gn, R(0), 3, cCs, 3, cE, 6, Fs, R(9), 12, Gn, R(0), 12, En, R(9), 12,
-    cD, Dn, R(0), 3, cFs, 3, cA, 6, Dn, R(9), 12, Dn, R(0), 12,     R(9), 12,
+    cA, En, 3, cCs, 3, cE, 6, En, 12, En, 12, En, 12,
+    cD, Fs, 3, cFs, 3, cA, 6, Fs, 12, Fs, 12, Fs, 12,
+    cA, Gn, 3, cCs, 3, cE, 6, Fs, 12, Gn, 12, En, 12,
+    cD, Dn, 3, cFs, 3, cA, 6, Dn, 12, Dn, 24,
     0,
 };
