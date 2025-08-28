@@ -777,10 +777,13 @@ static void show_title_screen(void) {
     wait_button();
 }
 
-static void play_melody(byte n, byte i) {
-    i <<= 1;
-    MEM_WR(0x4002 | n, notes[i + 0]);
-    MEM_WR(0x4003 | n, notes[i + 1]);
+static void play_melody(byte cmd) {
+    byte i = cmd & 0x7e;
+    byte n = cmd & 0x01;
+    byte r = (n << 2);
+    MEM_WR(0x4002 | r, notes[i + 0]);
+    MEM_WR(0x4003 | r, notes[i + 1]);
+    ticks[n] = 12;
 }
 
 static void play_drum(byte val) {
@@ -803,22 +806,15 @@ static void drum_hits(void) {
 }
 
 static void music_notes(void) {
-    byte cmd, val;
+    byte cmd;
     for (;;) {
 	cmd = melody[note++];
-	val = cmd & 0x3f;
-	switch (cmd & 0xc0) {
-	case 0x40:
-	    play_melody(0, val);
-	    ticks[0] = 12;
+	if (cmd & 0x80) {
+	    play_melody(cmd);
+	}
+	else {
+	    time = cmd;
 	    break;
-	case 0x80:
-	    play_melody(4, val);
-	    ticks[1] = 12;
-	    break;
-	default:
-	    time = val;
-	    return;
 	}
     }
 }

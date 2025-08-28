@@ -1,11 +1,11 @@
 #define REWIND		0xff
-#define N(p)		(0x40 | (4 * p))
+#define N(p)		(0x80 | ((8 * p)))
 
-#define cD		(0x80 | (4 * 2))
-#define cFs		(0x80 | (4 * 6))
-#define cA		(0x80 | (4 * 9))
-#define cCs		(0x80 | (4 * 1 + 1))
-#define cE		(0x80 | (4 * 4 + 1))
+#define cD		(0x81 | (8 * 2))
+#define cFs		(0x81 | (8 * 6))
+#define cA		(0x81 | (8 * 9))
+#define cCs		(0x81 | (8 * 1 + 2))
+#define cE		(0x81 | (8 * 4 + 2))
 
 #define Cn		N(0x0)
 #define Cs		N(0x1)
