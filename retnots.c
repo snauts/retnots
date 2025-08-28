@@ -30,7 +30,8 @@ void sdcc_deps(void) __naked {
     __asm__("_button:		.ds 1");
     __asm__("_scroll:		.ds 1");
     __asm__("_pages:		.ds 1");
-    __asm__("_sound:		.ds 1");
+    __asm__("_noise:		.ds 1");
+    __asm__("_bling:		.ds 1");
     __asm__("_lives:		.ds 1");
     __asm__("_speed:		.ds 1");
     __asm__("_ticks:		.ds 4");
@@ -153,7 +154,8 @@ extern byte row_idx;
 extern byte pending;
 extern byte button;
 extern byte pages;
-extern byte sound;
+extern byte noise;
+extern byte bling;
 extern int8 lives;
 extern byte speed;
 extern byte line;
@@ -480,18 +482,18 @@ static void sound_effect(void) {
     static const byte sfx[] = {
 	0x35, 0x47, 0x54, 0x6a,
     };
-    if (sound >= 0x30) {
+    if (noise) {
 	ticks[3] = 0;
 	NOISE_LO(0x0a);
 	NOISE_HI(0xf8);
-	NOISE_VL(sound--);
-	if (sound < 0x30) lives--;
+	NOISE_VL(0x30 | --noise);
+	if (noise == 0) lives--;
     }
-    if (sound > 0x00 && sound < 0x10) {
-	TRI_LO(sfx[sound >> 2]);
+    if (bling) {
+	TRI_LO(sfx[bling >> 2]);
 	TRI_HI(0x00);
 	TRI_CR(0x0f);
-	sound--;
+	bling--;
     }
 }
 
@@ -509,12 +511,12 @@ static void get_score(byte amount) {
     oam[38] = 0x01;
     oam[39] = oam[7];
     inc_score(amount);
-    sound = 0xf;
+    bling = 0x0f;
 }
 
 static void loose_live(void) {
     oam[77 + (lives << 2)] = 0xff;
-    sound = 0x3f;
+    noise = 0x10;
 }
 
 static const byte tile_score[] = {
@@ -778,7 +780,7 @@ static void play_melody(byte n, byte i) {
 }
 
 static void play_drum(byte val) {
-    if (sound < 0x30) {
+    if (noise == 0) {
 	NOISE_LO(val);
 	NOISE_HI(0xf8);
 	ticks[3] = 12;
