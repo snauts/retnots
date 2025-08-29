@@ -1,5 +1,5 @@
 #define REWIND		0xff
-#define N(p)		(0x80 | ((8 * p)))
+#define N(p)		(0x80 | (8 * p))
 
 #define Cn		N(0x0)
 #define Cs		N(0x1)
@@ -17,8 +17,8 @@
 #define cD		(1 | Dn)
 #define cFs		(1 | Fs)
 #define cA		(1 | An)
-#define cCs		(1 | Cs + 2)
-#define cE		(1 | En + 2)
+#define cCs		(1 | Cs + (byte) 2)
+#define cE		(1 | En + (byte) 2)
 
 static const byte melody[] = {
     cD, An, 3, cFs, 3, cA, 18, Fs, 24,
