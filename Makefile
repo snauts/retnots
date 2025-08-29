@@ -11,6 +11,9 @@ all: build
 run: build
 	fceux $(NAME).nes
 
+mame: build
+	mame nes -cart $(NAME).nes
+
 pal:
 	TFLAGS=-DPAL make build
 
