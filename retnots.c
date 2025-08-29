@@ -807,7 +807,7 @@ static void drum_hits(void) {
     else if (drum == 12) {
 	play_drum(3);
     }
-    drum--;
+    if (!mute) drum--;
 }
 
 static void music_notes(void) {
