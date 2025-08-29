@@ -636,7 +636,6 @@ static void check_controls(void) {
 }
 
 static void progression(void) {
-    if (pages == 9) speed = 2;
 }
 
 static void game_loop(void) {
@@ -782,7 +781,7 @@ static void show_title_screen(void) {
     wait_button();
 }
 
-static void play_melody(byte cmd) {
+static void play_note(byte cmd) {
     byte i = cmd & 0x7e;
     byte n = cmd & 0x01;
     byte r = (n << 2);
@@ -807,7 +806,7 @@ static void drum_hits(void) {
     else if (drum == 12) {
 	play_drum(3);
     }
-    if (!mute) drum--;
+    drum--;
 }
 
 static void music_notes(void) {
@@ -815,7 +814,7 @@ static void music_notes(void) {
     for (;;) {
 	cmd = melody[note++];
 	if (cmd & 0x80) {
-	    play_melody(cmd);
+	    play_note(cmd);
 	}
 	else {
 	    time = cmd;
@@ -860,8 +859,7 @@ static void rewind_music(void) {
     }
 }
 
-static void play_music(void) {
-    drum_hits();
+static void play_melody(void) {
     if (time == 0) {
 	music_notes();
 	rewind_music();
@@ -869,8 +867,15 @@ static void play_music(void) {
 	    skip = note = 0;
 	}
     }
+    time--;
+}
+
+static void play_music(void) {
+    if (!mute) {
+	drum_hits();
+	play_melody();
+    }
     set_volume();
-    if (!mute) time--;
 }
 
 void game_startup(void) {
