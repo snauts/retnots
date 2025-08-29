@@ -823,6 +823,10 @@ static const byte envelope[] = {
     0x30, 0x31, 0x32, 0x33,
     0x34, 0x36, 0x38, 0x3a,
     0x3c, 0x3e, 0x3f, 0x3e,
+
+    0x30, 0x31, 0x31, 0x31,
+    0x32, 0x32, 0x34, 0x36,
+    0x38, 0x3a, 0x3c, 0x3f,
 };
 
 static void stop_music(void) {
@@ -832,9 +836,10 @@ static void stop_music(void) {
 }
 
 static void set_volume(void) {
+    static const byte offsets[] = { 0, 12, 0, 12 };
     for (byte i = 0; i < SIZE(ticks); i++) {
 	if (ticks[i]) {
-	    byte volume = envelope[--ticks[i]];
+	    byte volume = envelope[--ticks[i] + offsets[i]];
 	    MEM_WR(0x4000 + (i << 2), volume);
 	}
     }
