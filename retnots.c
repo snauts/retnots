@@ -45,6 +45,7 @@ void sdcc_deps(void) __naked {
     __asm__("_time:		.ds 1");
     /* memset(0) END */
     __asm__("_pos:		.ds 1");
+    __asm__("_mute:		.ds 1");
 
     __asm__(".area OAM (PAG)");
     __asm__("_oam:		.ds 256");
@@ -167,6 +168,7 @@ extern byte drum;
 extern byte skip;
 extern byte note;
 extern byte time;
+extern byte mute;
 extern byte pos;
 
 static const char default_table[] = "HORACE.0300JENOTS.0200ARCHIE.0100";
@@ -218,6 +220,7 @@ static void reset_game(void) {
 static void init_memory(void) {
     benchmark = 0xffff;
 
+    mute = 0;
     reset_game();
     wipe_sprites();
 
@@ -611,8 +614,10 @@ static void start_new_game(void) {
 }
 
 static void check_controls(void) {
-    check_button();
     byte i = bump ? 0x36 : 0x06;
+    if (check_button() & BUTTON_SELECT) {
+	mute = !mute;
+    }
     if (button & SKI_RIGHT && pos < 236) {
 	pos = pos + speed;
 	i -= 3;
@@ -865,7 +870,7 @@ static void play_music(void) {
 	}
     }
     set_volume();
-    time--;
+    if (!mute) time--;
 }
 
 void game_startup(void) {
