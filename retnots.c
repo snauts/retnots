@@ -639,7 +639,7 @@ static void check_controls(void) {
 }
 
 static void progression(void) {
-    if (pages == 16) speed = 3;
+    if (pages == 16) speed = 2;
     if (pages == 27) speed = 1;
 }
 
