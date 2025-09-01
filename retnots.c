@@ -522,7 +522,6 @@ static void get_score(byte amount) {
 
 static void loose_live(void) {
     oam[77 + (lives << 2)] = 0xff;
-    noise = 0x10;
     lives--;
 }
 
@@ -546,6 +545,7 @@ static void hit_tile(byte hit) {
 	}
 	else if (speed < 4) {
 	    loose_live();
+	    noise = 0x10;
 	}
     }
 }
@@ -805,9 +805,32 @@ static void failure_slide(void) {
     }
 }
 
+static void convert_live(void) {
+    if (lives > 0 && oam[37] == 0xff) {
+	get_score(9);
+	loose_live();
+	oam[37] = 10;
+    }
+    else if (oam[36] == 0x20) {
+	oam[37] = 9;
+    }
+}
+
+static void victory_scene(void) {
+    lives &= ~0x80;
+    do {
+	wait_signal();
+	animate_score();
+	convert_live();
+	sound_effect();
+    }
+    while (oam[37] != 0xff);
+    wait_button();
+}
+
 static void end_game_scene(void) {
     if (is_bottom()) {
-	wait_button();
+	victory_scene();
     }
     else {
 	failure_slide();
