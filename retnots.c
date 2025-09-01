@@ -494,7 +494,6 @@ static void sound_effect(void) {
 	NOISE_LO(0x0a);
 	NOISE_HI(0xf8);
 	NOISE_VL(0x30 | --noise);
-	if (noise == 0) lives--;
     }
     if (bling) {
 	TRI_LO(sfx[bling >> 2]);
@@ -524,6 +523,7 @@ static void get_score(byte amount) {
 static void loose_live(void) {
     oam[77 + (lives << 2)] = 0xff;
     noise = 0x10;
+    lives--;
 }
 
 static const byte tile_score[] = {
@@ -768,8 +768,50 @@ static void copy_score_from_oam(void) {
     }
 }
 
-static void victory_scene(void) {
-    if (is_bottom()) wait_button();
+static const byte debris_img[] = {
+    0x3c,0xb0,0x00,0xf8, 0x3c,0xb0,0x40,0x08,
+    0x34,0xa0,0x00,0xf8, 0x34,0xa0,0x40,0x08,
+};
+
+static void setup_debris_sprites(void) {
+    memcpy(oam + 36, debris_img, SIZE(debris_img));
+    for (byte i = 39; i <= 51; i += 4) oam[i] += pos;
+}
+
+static void update_oam(byte n, int8 dir) {
+    byte x = oam[n];
+    if (x > 0 && x < 248) {
+	oam[n] = x + dir;
+    }
+    else {
+	oam[n - 2] = 0xff;
+    }
+}
+
+static void failure_slide(void) {
+    animate_racoon(0x60);
+    setup_debris_sprites();
+    for (byte n = 0; n < 48; n++) {
+	wait_signal();
+	sound_effect();
+	oam[6] = (n & 8) ? BIT(6) : 0;
+	for (byte i = 0; i < 44; i += 4) {
+	    oam[i]++;
+	}
+	update_oam(39, -1);
+	update_oam(43, +1);
+	update_oam(47, -1);
+	update_oam(51, +1);
+    }
+}
+
+static void end_game_scene(void) {
+    if (is_bottom()) {
+	wait_button();
+    }
+    else {
+	failure_slide();
+    }
     copy_score_from_oam();
 }
 
@@ -892,7 +934,7 @@ void game_startup(void) {
 	start_new_game();
 	game_loop();
 	stop_music();
-	victory_scene();
+	end_game_scene();
 	update_table();
 	wipe_screen();
 	stop_game();
