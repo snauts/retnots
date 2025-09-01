@@ -817,6 +817,7 @@ static void convert_live(void) {
 }
 
 static void victory_scene(void) {
+    animate_racoon(0);
     lives &= ~0x80;
     do {
 	wait_signal();
