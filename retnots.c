@@ -816,11 +816,15 @@ static void convert_live(void) {
     }
 }
 
+static void animate_pump(void) {
+    animate_racoon(counter & 16 ? 0x00 : 0x30);
+}
+
 static void victory_scene(void) {
-    animate_racoon(0);
     lives &= ~0x80;
     do {
 	wait_signal();
+	animate_pump();
 	animate_score();
 	convert_live();
 	sound_effect();
