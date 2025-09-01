@@ -521,7 +521,7 @@ static void get_score(byte amount) {
 }
 
 static void loose_live(void) {
-    oam[77 + (lives << 2)] = 0xff;
+    if (lives > 0) oam[77 + (lives << 2)] = 0xff;
     lives--;
 }
 
