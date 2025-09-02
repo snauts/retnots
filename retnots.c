@@ -337,8 +337,12 @@ static byte check_button(void) {
     return press;
 }
 
+static byte no_button_push(void) {
+    return !(check_button() & BUTTON_SOME);
+}
+
 static void wait_button(void) {
-    while (!(check_button() & BUTTON_SOME)) { }
+    while (no_button_push()) { }
 }
 
 static const char special[] = ".!?";
@@ -830,7 +834,11 @@ static void victory_scene(void) {
 	sound_effect();
     }
     while (oam[37] != 0xff);
-    wait_button();
+
+    while (no_button_push()) {
+	wait_signal();
+	animate_pump();
+    }
 }
 
 static void end_game_scene(void) {
