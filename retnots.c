@@ -194,14 +194,6 @@ static void memcpy(byte *dst, byte *src, byte count) {
     while (count-- > 0) { *dst++ = *src++; }
 }
 
-static void clear_palette(void) {
-    PPUADDR(0x3f);
-    PPUADDR(0x00);
-    for (byte i = 0; i < 32; i++) {
-	PPUDATA(0x0f);
-    }
-}
-
 static void wipe_sprites(void) {
     byte i = 0;
     do { oam[i++] = 0xff; } while (i != 0);
@@ -281,8 +273,6 @@ static void hw_init(void) {
 
     wait_vblank();
     init_memory();
-    wait_vblank();
-    clear_palette();
     wait_vblank();
     ppu_ctrl();
 
