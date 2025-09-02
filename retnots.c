@@ -499,6 +499,9 @@ static void animate_score(void) {
 	if (oam[36]-- < 0x10) {
 	    oam[37] = 0xff;
 	}
+	else if (oam[36] < 0x14) {
+	    oam[37] = 0x0b;
+	}
     }
 }
 
