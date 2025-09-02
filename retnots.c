@@ -544,7 +544,7 @@ static void hit_tile(byte hit) {
 	    get_score(1);
 	}
 	else if (bump == JUMP) {
-	    safe = 64;
+	    safe = 96;
 	}
 	else {
 	    loose_live();
@@ -639,7 +639,7 @@ static void check_controls(void) {
 	i = counter & 0x10 ? 0x0c : 0x3c;
     }
     else if (bump == JUMP) {
-	i = 0x66;
+	i = counter & 0x10 ? 0x66 : 0x96;
     }
     else if (bump > SPECIAL) {
 	i = 0x60;
