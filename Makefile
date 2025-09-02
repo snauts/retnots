@@ -25,12 +25,12 @@ size:
 	echo Compile pcx-dump
 	gcc $(TOOL_FILES) $(TFLAGS) -lm -o pcx-dump
 	./pcx-dump -r tiles.chr
-	./pcx-dump -t special.pcx
-	./pcx-dump -t fonts.pcx
-	./pcx-dump -l slope.pcx
-	./pcx-dump -l title.pcx
+	./pcx-dump -t special.pcx	 > tables.hdr
+	./pcx-dump -t fonts.pcx		>> tables.hdr
+	./pcx-dump -l slope.pcx		>> tables.hdr
+	./pcx-dump -l title.pcx		>> tables.hdr
 	./pcx-dump -p tiles.chr
-	./pcx-dump -g tables.hdr
+	./pcx-dump -g tables.hdr	>> tables.hdr
 	./pcx-dump -s sprites.pcx
 	echo Compile $(NAME).c
 	sdcc -mmos6502 $(CFLAGS) $(NAME).c -c

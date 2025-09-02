@@ -4,9 +4,6 @@ typedef unsigned short word;
 
 #define NULL ((void *) 0)
 
-#include "fonts.hdr"
-#include "slope.hdr"
-#include "title.hdr"
 #include "tables.hdr"
 
 #include "music.h"
@@ -348,7 +345,7 @@ static void wait_button(void) {
 static const char special[] = ".!?";
 
 static byte char_to_tile(char c) {
-    byte sym = c + FONT_START;
+    byte sym = c + START_OF_fonts;
     if (c == ' ') return 0;
     for (byte i = 0; i < sizeof(special) - 1; i++) {
 	if (special[i] == c) return sym - c;

@@ -34,6 +34,13 @@ static void replace_ext(char *name, const char *ext) {
     strcpy(name + strlen(file_name) - strlen(ext), ext);
 }
 
+static char *remove_ext(void) {
+    static char str[256];
+    strcpy(str, file_name);
+    str[strlen(str) - 4] = 0;
+    return str;
+}
+
 static unsigned char *read_pcx(const char *file) {
     int palette_offset = 16;
     int size = file_size(file);
@@ -183,18 +190,18 @@ static int get_diffs(unsigned char *buf, int max) {
     return max;
 }
 
-static void print_hex(FILE *fp, void *ptr, int *size, int w) {
+static void print_hex(void *ptr, int *size, int w) {
     ptr += *size * w;
     switch (w) {
     case 1:
-	fprintf(fp, " 0x%02x,", * (unsigned char *) ptr);
+	printf(" 0x%02x,", * (unsigned char *) ptr);
 	break;
     case 2:
-	fprintf(fp, " 0x%04x,", * (unsigned short *) ptr);
+	printf(" 0x%04x,", * (unsigned short *) ptr);
 	break;
     }
     if (((*size)++ & 0x7) == 0x7) {
-	fprintf(fp, "\n");
+	printf("\n");
     }
 }
 
@@ -260,18 +267,18 @@ static int generate_attr_map(unsigned char *buf, unsigned char *map) {
     return i;
 }
 
-static void save_hex(FILE *fp, void *map, int count, int w) {
+static void save_hex(void *map, int count, int w) {
     int i = 0;
     while (i < count) {
-	print_hex(fp, map, &i, w);
+	print_hex(map, &i, w);
     }
     if (i & 7) {
-	fprintf(fp, "\n");
+	printf("\n");
     }
 }
 
-static void save_map(FILE *fp, void *map, int count) {
-    save_hex(fp, map, count, 1);
+static void save_map(void *map, int count) {
+    save_hex(map, count, 1);
 }
 
 static unsigned char pack_addr(int a) {
@@ -294,23 +301,18 @@ static int generate_rows(unsigned char *rows, int attrs) {
 
 int compress(void *dst, void *src, int size);
 
-static void save_row_tables(FILE *fp) {
+static void save_row_tables(void) {
     unsigned char row_table[64];
-    fprintf(fp, "static const byte row_table[] = {\n");
-    save_map(fp, row_table, generate_rows(row_table, 1));
-    fprintf(fp, "};\n");
+    printf("static const byte row_table[] = {\n");
+    save_map(row_table, generate_rows(row_table, 1));
+    printf("};\n");
 
-    fprintf(fp, "static const byte line_table[] = {\n");
-    save_map(fp, row_table, generate_rows(row_table, 0));
-    fprintf(fp, "};\n");
+    printf("static const byte line_table[] = {\n");
+    save_map(row_table, generate_rows(row_table, 0));
+    printf("};\n");
 }
 
 static void generate_level_data(unsigned char *buf) {
-    char name[256];
-    replace_ext(name, "hdr");
-    FILE *fp = fopen(name, "w");
-    name[strlen(name) - 4] = 0;
-
     int addr[header.h];
 
     int max_tiles = buf_size() / 64;
@@ -338,24 +340,19 @@ static void generate_level_data(unsigned char *buf) {
 	chunk = 960 - chunk;
     }
 
-    fprintf(fp, "static const byte %s[] = {\n", name);
-    save_map(fp, done, compress(done, data, size));
-    fprintf(fp, "};\n");
-
-    fclose(fp);
+    printf("static const byte %s[] = {\n", remove_ext());
+    save_map(done, compress(done, data, size));
+    printf("};\n");
 }
 
-static void output_font_offset(void) {
-    int offset = tileset_size / 16;
-    FILE *fp = fopen("fonts.hdr", "w");
-    fprintf(fp, "#define FONT_START %d\n", offset);
-    fclose(fp);
+static void output_tile_offset(void) {
+    printf("#define START_OF_%s %d\n", remove_ext(), tileset_size / 16);
 }
 
 static void save_tiles(unsigned char *buf) {
     load_tileset();
-    if (strcmp(file_name, "fonts.pcx") == 0) {
-	output_font_offset();
+    if (option == 't') {
+	output_tile_offset();
     }
     if (option == 'l') {
 	generate_level_data(buf);
@@ -382,23 +379,20 @@ static float frequencies[] = {
 };
 
 static int generate_tables(void) {
-    FILE *fp = fopen(file_name, "w");
+    save_row_tables();
 
-    save_row_tables(fp);
-
-    fprintf(fp, "static const byte notes[] = {\n");
+    printf("static const byte notes[] = {\n");
     for (int pitch = 0; pitch < 12; pitch++) {
 	for (int octave = 0; octave < 4; octave++) {
 	    int index = 4 * pitch + octave;
 	    const float cpu = 1789773.0 / 16; /* 1662607.0 for PAL */
 	    unsigned period = roundf(cpu / frequencies[index] - 1);
-	    fprintf(fp, " 0x%02x,0x%02x,", period & 0xff, period >> 8);
+	    printf(" 0x%02x,0x%02x,", period & 0xff, period >> 8);
 	}
-	fprintf(fp, "\n");
+	printf("\n");
     }
-    fprintf(fp, "};\n");
+    printf("};\n");
 
-    fclose(fp);
     return 0;
 }
 
@@ -417,7 +411,7 @@ int main(int argc, char **argv) {
     file_name = argv[2];
     option = argv[1][1];
 
-    printf("pcx-dump -%c %s\n", option, argv[2]);
+    fprintf(stderr, "pcx-dump -%c %s\n", option, argv[2]);
 
     switch (option) {
     case 'r':
