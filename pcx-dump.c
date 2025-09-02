@@ -114,8 +114,6 @@ static void save_sprites(unsigned char *buf) {
 static int reset_tiles(void) {
     unsigned char buf[16];
     int fd = open(file_name, O_CREAT | O_TRUNC | O_RDWR, 0644);
-    memset(buf, 0, sizeof(buf));
-    write(fd, buf, sizeof(buf));
     close(fd);
     return 0;
 }

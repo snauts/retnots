@@ -26,6 +26,7 @@ size:
 	gcc $(TOOL_FILES) $(TFLAGS) -lm -o pcx-dump
 	./pcx-dump -r tiles.chr
 	./pcx-dump -t special.pcx	 > tables.hdr
+	./pcx-dump -t speed2x.pcx	>> tables.hdr
 	./pcx-dump -t fonts.pcx		>> tables.hdr
 	./pcx-dump -l slope.pcx		>> tables.hdr
 	./pcx-dump -l title.pcx		>> tables.hdr
