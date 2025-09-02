@@ -529,8 +529,8 @@ static const byte tile_score[] = {
     0, 0,
     /* speed 2x */
     1, 2, 3,
-    0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
 };
 
 static void hit_tile(byte hit) {
