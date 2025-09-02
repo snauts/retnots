@@ -544,7 +544,7 @@ static void hit_tile(byte hit) {
 	    get_score(1);
 	}
 	else if (bump == JUMP) {
-	    safe = 96;
+	    safe = 64;
 	}
 	else {
 	    loose_live();
@@ -627,7 +627,10 @@ static void check_controls(void) {
     if (check_button() & BUTTON_SELECT) {
 	mute = !mute;
     }
-    if (button & SKI_RIGHT && pos < 236) {
+    if (bump == JUMP) {
+	i = counter & 0x10 ? 0x66 : 0x96;
+    }
+    else if (button & SKI_RIGHT && pos < 236) {
 	pos = pos + speed;
 	i -= 3;
     }
@@ -637,9 +640,6 @@ static void check_controls(void) {
     }
     if (bump == SLIDE) {
 	i = counter & 0x10 ? 0x0c : 0x3c;
-    }
-    else if (bump == JUMP) {
-	i = counter & 0x10 ? 0x66 : 0x96;
     }
     else if (bump > SPECIAL) {
 	i = 0x60;
