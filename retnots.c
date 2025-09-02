@@ -499,7 +499,7 @@ static void animate_score(void) {
 	if (oam[36]-- < 0x10) {
 	    oam[37] = 0xff;
 	}
-	else if (oam[36] < 0x14) {
+	else if (oam[36] == 0x14) {
 	    oam[37] = 0x0b;
 	}
     }
@@ -805,7 +805,7 @@ static void convert_live(void) {
 	loose_live();
 	oam[37] = 10;
     }
-    else if (oam[36] == 0x20) {
+    else if (oam[36] == 0x24) {
 	oam[37] = 9;
     }
 }
