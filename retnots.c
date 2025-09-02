@@ -547,7 +547,7 @@ static void hit_tile(byte hit) {
 	else if (bump == SPECIAL) {
 	    get_score(1);
 	}
-	else if (speed < 4) {
+	else {
 	    loose_live();
 	    noise = 0x10;
 	}
