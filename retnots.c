@@ -131,7 +131,8 @@ void rst(void) __naked {
 
 #define HEIGHT		240
 #define SLIDE	 	10
-#define SPECIAL 	10
+#define JUMP		11
+#define SPECIAL 	11
 #define NAME_SIZE	7
 #define ENTRY_SIZE	11
 
@@ -524,6 +525,7 @@ static const byte tile_score[] = {
     0, 1, 2, 3, 4,
     SLIDE, SLIDE, SLIDE, SLIDE, SLIDE, SLIDE, SLIDE,
     SLIDE, SLIDE, SLIDE, SLIDE, SLIDE, SLIDE, SLIDE,
+    JUMP,
     0, 0,
     /* speed 2x */
     1, 2, 3,
@@ -540,6 +542,9 @@ static void hit_tile(byte hit) {
 	}
 	else if (bump == SLIDE) {
 	    get_score(1);
+	}
+	else if (bump == JUMP) {
+	    safe = 64;
 	}
 	else {
 	    loose_live();
@@ -632,6 +637,9 @@ static void check_controls(void) {
     }
     if (bump == SLIDE) {
 	i = counter & 0x10 ? 0x0c : 0x3c;
+    }
+    else if (bump == JUMP) {
+	i = 0x66;
     }
     else if (bump > SPECIAL) {
 	i = 0x60;
