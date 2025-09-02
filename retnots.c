@@ -560,7 +560,10 @@ static void prepare_readback(void) {
     BYTE(ppu_read, 1) = (i & 0x0f) | 0x20;
 
     byte hit = MAX(ppu_buffer[0], ppu_buffer[1]);
-    if (hit < SIZE(tile_score)) hit = tile_score[hit];
+    if (hit < SIZE(tile_score)) {
+	speed = hit >= START_OF_speed2x ? 2 : 1;
+	hit = tile_score[hit];
+    }
 
     if (safe < 0) {
 	hit_tile(hit);
@@ -642,11 +645,6 @@ static void check_controls(void) {
     animate_racoon(i);
 }
 
-static void progression(void) {
-    if (pages == 16) speed = 2;
-    if (pages == 27) speed = 1;
-}
-
 static void game_loop(void) {
     wait_vblank();
     while (lives >= 0) {
@@ -657,7 +655,6 @@ static void game_loop(void) {
 	check_controls();
 	animate_score();
 	sound_effect();
-	progression();
 	play_music();
     }
 }
