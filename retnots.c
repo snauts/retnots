@@ -130,6 +130,7 @@ void rst(void) __naked {
 #define BUTTON_SOME	(BUTTON_START | SKI_LEFT | SKI_RIGHT)
 
 #define HEIGHT		240
+#define SLIDE	 	10
 #define SPECIAL 	10
 #define NAME_SIZE	7
 #define ENTRY_SIZE	11
@@ -520,24 +521,24 @@ static void loose_live(void) {
 }
 
 static const byte tile_score[] = {
-    0x0, 0x1, 0x2, 0x3, 0x4,
-    0xa, 0xa, 0xa, 0xa, 0xa, 0xa, 0xa,
-    0xa, 0xa, 0xa, 0xa, 0xa, 0xa, 0xa,
-    0x0, 0x0,
+    0, 1, 2, 3, 4,
+    SLIDE, SLIDE, SLIDE, SLIDE, SLIDE, SLIDE, SLIDE,
+    SLIDE, SLIDE, SLIDE, SLIDE, SLIDE, SLIDE, SLIDE,
+    0, 0,
     /* speed 2x */
-    0x1, 0x2, 0x3,
-    0x0, 0x0, 0x0, 0x0, 0x0,
-    0x0, 0x0, 0x0, 0x0, 0x0,
+    1, 2, 3,
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0,
 };
 
 static void hit_tile(byte hit) {
     bump = hit;
     if (bump) {
 	safe = 9;
-	if (bump < SPECIAL) {
+	if (bump < SLIDE) {
 	    get_score(bump);
 	}
-	else if (bump == SPECIAL) {
+	else if (bump == SLIDE) {
 	    get_score(1);
 	}
 	else {
@@ -629,7 +630,7 @@ static void check_controls(void) {
 	pos = pos - speed;
 	i += 3;
     }
-    if (bump == SPECIAL) {
+    if (bump == SLIDE) {
 	i = counter & 0x10 ? 0x0c : 0x3c;
     }
     else if (bump > SPECIAL) {
