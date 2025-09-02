@@ -526,7 +526,7 @@ static const byte tile_score[] = {
     SLIDE, SLIDE, SLIDE, SLIDE, SLIDE, SLIDE, SLIDE,
     SLIDE, SLIDE, SLIDE, SLIDE, SLIDE, SLIDE, SLIDE,
     JUMP, JUMP, JUMP,
-    0, 0, 0,
+    0, 0,
     /* speed 2x */
     1, 2, 3,
     0, 0, 0, 0, 0,
