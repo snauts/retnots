@@ -544,7 +544,7 @@ static void hit_tile(byte hit) {
 	    get_score(1);
 	}
 	else if (bump == JUMP) {
-	    safe = 64;
+	    safe = 40;
 	}
 	else {
 	    loose_live();
