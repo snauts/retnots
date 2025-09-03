@@ -1,6 +1,7 @@
 NAME   = retnots
 LEVEL  ?= slope.pcx
 MAKE   = make --no-print-directory
+CROP   ?= 130
 
 CFLAGS = --nostdinc --nostdlib --no-std-crt0 --no-zp-spill --opt-code-speed
 LFLAGS = -n -b OAM=0x200 -b BSS=0x300 -b CODE=0x8000 -b VECTOR=0xfffa
@@ -13,7 +14,7 @@ run: build
 	fceux $(NAME).nes
 
 test:
-	magick slope.pcx -crop 256x6000+0+$$((32 * 130)) testing.pcx
+	magick slope.pcx -crop 256x6000+0+$$((32 * $(CROP))) testing.pcx
 	LEVEL=testing.pcx make run
 
 mame: build
