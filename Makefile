@@ -1,4 +1,5 @@
 NAME   = retnots
+LEVEL  ?= slope.pcx
 MAKE   = make --no-print-directory
 
 CFLAGS = --nostdinc --nostdlib --no-std-crt0 --no-zp-spill --opt-code-speed
@@ -10,6 +11,10 @@ all: build
 
 run: build
 	fceux $(NAME).nes
+
+test:
+	magick slope.pcx -crop 256x6000+0+$$((32 * 130)) testing.pcx
+	LEVEL=testing.pcx make run
 
 mame: build
 	mame nes -cart $(NAME).nes
@@ -24,12 +29,13 @@ size:
 .SILENT build:
 	echo Compile pcx-dump
 	gcc $(TOOL_FILES) $(TFLAGS) -lm -o pcx-dump
+	echo "#define $(subst .,_,$(LEVEL))" > tables.hdr
 	./pcx-dump -r tiles.chr
-	./pcx-dump -t special.pcx	 > tables.hdr
+	./pcx-dump -t special.pcx	>> tables.hdr
 	./pcx-dump -t speed2x.pcx	>> tables.hdr
 	./pcx-dump -t fonts.pcx		>> tables.hdr
-	./pcx-dump -l slope.pcx		>> tables.hdr
 	./pcx-dump -l title.pcx		>> tables.hdr
+	./pcx-dump -l $(LEVEL)		>> tables.hdr
 	./pcx-dump -p tiles.chr
 	./pcx-dump -g tables.hdr	>> tables.hdr
 	./pcx-dump -s sprites.pcx
@@ -46,4 +52,4 @@ size:
 
 clean:
 	rm -f *.asm *.ihx *.lst *.map *.rel *.sym *.chr *.hdr *.prg *.nes
-	rm -f pcx-dump
+	rm -f pcx-dump testing.pcx

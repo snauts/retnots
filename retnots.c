@@ -610,12 +610,18 @@ static void show_score(void) {
     memcpy(oam + 64, score_img, SIZE(score_img));
 }
 
+#ifdef slope_pcx
+#define LEVEL slope
+#else
+#define LEVEL testing
+#endif
+
 static void start_new_game(void) {
     pos = 124;
     wipe_palette();
     reset_game();
     show_score();
-    reset_rows(slope, 36);
+    reset_rows(LEVEL, 36);
     animate_racoon(0);
     setup_palette();
     wait_button();
@@ -857,10 +863,12 @@ static void stop_game(void) {
 }
 
 static void show_title_screen(void) {
+#ifndef testing_pcx
     reset_rows(title, 30);
     show_highscore_table();
     setup_palette();
     wait_button();
+#endif
 }
 
 static void play_note(byte cmd) {
