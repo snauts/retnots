@@ -560,7 +560,9 @@ static void prepare_readback(void) {
 
     byte hit = MAX(ppu_buffer[0], ppu_buffer[1]);
     if (hit < SIZE(tile_score)) {
-	speed = hit < START_OF_speed2x ? 1 : 2;
+	if (safe < 0) {
+	    speed = hit < START_OF_speed2x ? 1 : 2;
+	}
 	hit = tile_score[hit];
     }
 
