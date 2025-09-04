@@ -625,8 +625,6 @@ static void show_score(void) {
 
 static void setup_snow(void) {
     oam[40] = oam[44] = 0x44;
-    oam[42] = 0x00;
-    oam[46] = 0x40;
 }
 
 static void start_new_game(void) {
@@ -648,12 +646,27 @@ static void hide_snow(void) {
 
 static void animate_snow(byte n) {
     byte frame = 12 + ((counter & 0xc) >> 2);
-    if (n != 9) oam[41] = frame;
-    if (n != 3) oam[45] = frame;
+    oam[41] = frame;
+    oam[45] = frame;
 
-    byte offset = n == 6 ? 8 : 6;
-    oam[43] = pos - offset;
-    oam[47] = pos + offset;
+    if (n == 3) {
+	oam[43] = pos - 6;
+	oam[47] = pos + 2;
+	oam[42] = 0x00;
+	oam[46] = 0x00;
+    }
+    else if (n == 9) {
+	oam[43] = pos - 2;
+	oam[47] = pos + 6;
+	oam[42] = 0x40;
+	oam[46] = 0x40;
+    }
+    else {
+	oam[43] = pos - 8;
+	oam[47] = pos + 8;
+	oam[42] = 0x00;
+	oam[46] = 0x40;
+    }
 }
 
 static void check_controls(void) {
