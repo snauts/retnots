@@ -623,6 +623,12 @@ static void show_score(void) {
 #define LEVEL testing
 #endif
 
+static void setup_snow(void) {
+    oam[40] = oam[44] = 0x44;
+    oam[42] = 0x00;
+    oam[46] = 0x40;
+}
+
 static void start_new_game(void) {
     pos = 124;
     wipe_palette();
@@ -631,15 +637,32 @@ static void start_new_game(void) {
     reset_rows(LEVEL, 36);
     animate_racoon(0);
     setup_palette();
+    setup_snow();
     wait_button();
     speed = 1;
 }
 
+static void hide_snow(void) {
+    oam[41] = oam[45] = 0xff;
+}
+
+static void animate_snow(byte n) {
+    byte frame = 12 + ((counter & 0xc) >> 2);
+    if (n != 9) oam[41] = frame;
+    if (n != 3) oam[45] = frame;
+
+    byte offset = n == 6 ? 8 : 6;
+    oam[43] = pos - offset;
+    oam[47] = pos + offset;
+}
+
 static void check_controls(void) {
     byte i = bump ? 0x36 : 0x06;
+
     if (check_button() & BUTTON_SELECT) {
 	mute = !mute;
     }
+
     if (button & SKI_RIGHT && pos < 236) {
 	pos = pos + speed;
 	i -= 3;
@@ -648,6 +671,8 @@ static void check_controls(void) {
 	pos = pos - speed;
 	i += 3;
     }
+
+    hide_snow();
     if (bump == SLIDE) {
 	i = counter & 0x10 ? 0x0c : 0x3c;
     }
@@ -657,6 +682,10 @@ static void check_controls(void) {
     else if (bump > SPECIAL) {
 	i = 0x60;
     }
+    else {
+	animate_snow(i & 0xf);
+    }
+
     animate_racoon(i);
 }
 
@@ -983,6 +1012,7 @@ void game_startup(void) {
 	show_title_screen();
 	start_new_game();
 	game_loop();
+	hide_snow();
 	stop_music();
 	end_game_scene();
 	update_table();
