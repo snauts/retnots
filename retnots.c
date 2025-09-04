@@ -211,7 +211,12 @@ static void reset_game(void) {
 static void init_memory(void) {
     benchmark = 0xffff;
 
+#ifdef testing_pcx
+    mute = 1;
+#else
     mute = 0;
+#endif
+
     reset_game();
     wipe_sprites();
 
