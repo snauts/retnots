@@ -651,9 +651,9 @@ static void hide_snow(void) {
     oam[46] = a2;
 
 static void animate_snow(byte n) {
-    byte frame = 12 + ((counter & 0xc) >> 2);
-    oam[41] = frame;
-    oam[45] = frame;
+    byte frame = (counter & 0xc) >> 2;
+    oam[41] = 12 + frame;
+    oam[45] = 12 + ((frame + 2) & 3);
 
     if (n == 3) {
 	ADJUST_SNOW(6, 2, 0x00, 0x00);
