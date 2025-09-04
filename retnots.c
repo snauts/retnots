@@ -824,8 +824,8 @@ static void copy_score_from_oam(void) {
 }
 
 static const byte debris_img[] = {
-    0x3c,0x3f,0x00,0xf8, 0x3c,0x3f,0x40,0x08,
-    0x34,0x4f,0x00,0xf8, 0x34,0x4f,0x40,0x08,
+    0x3c,0x4f,0x00,0xf8, 0x3c,0x4f,0x40,0x08,
+    0x34,0x6f,0x00,0xf8, 0x34,0x6f,0x40,0x08,
 };
 
 static void setup_debris_sprites(void) {
@@ -835,18 +835,22 @@ static void setup_debris_sprites(void) {
 
 static void update_oam(byte n, int8 dir) {
     byte x = oam[n];
+    byte s = n - 2;
     if (x > 0 && x < 248) {
 	oam[n] = x + dir;
+	if ((counter & 7) == 0) {
+	    oam[s] ^= 0x10;
+	}
     }
     else {
-	oam[n - 2] = 0xff;
+	oam[s] = 0xff;
     }
 }
 
 static void failure_slide(void) {
     animate_racoon(0x90);
     setup_debris_sprites();
-    for (byte n = 0; n < 48; n++) {
+    for (byte n = 0; n < 64; n++) {
 	wait_signal();
 	sound_effect();
 	oam[6] = (n & 8) ? BIT(6) : 0;
