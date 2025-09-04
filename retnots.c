@@ -644,28 +644,25 @@ static void hide_snow(void) {
     oam[41] = oam[45] = 0xff;
 }
 
+#define ADJUST_SNOW(dx1, dx2, a1, a2) \
+    oam[43] = pos - dx1; \
+    oam[47] = pos + dx2; \
+    oam[42] = a1; \
+    oam[46] = a2;
+
 static void animate_snow(byte n) {
     byte frame = 12 + ((counter & 0xc) >> 2);
     oam[41] = frame;
     oam[45] = frame;
 
     if (n == 3) {
-	oam[43] = pos - 6;
-	oam[47] = pos + 2;
-	oam[42] = 0x00;
-	oam[46] = 0x00;
+	ADJUST_SNOW(6, 2, 0x00, 0x00);
     }
     else if (n == 9) {
-	oam[43] = pos - 2;
-	oam[47] = pos + 6;
-	oam[42] = 0x40;
-	oam[46] = 0x40;
+	ADJUST_SNOW(2, 6, 0x40, 0x40);
     }
     else {
-	oam[43] = pos - 8;
-	oam[47] = pos + 8;
-	oam[42] = 0x00;
-	oam[46] = 0x40;
+	ADJUST_SNOW(8, 8, 0x00, 0x40);
     }
 }
 
