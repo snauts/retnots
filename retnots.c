@@ -45,6 +45,7 @@ void sdcc_deps(void) __naked {
     __asm__("_mute:		.ds 1");
 
     __asm__(".area OAM (PAG)");
+    __asm__("_spr:");
     __asm__("_oam:		.ds 256");
 
     __asm__(".area CODE");
@@ -136,6 +137,14 @@ void rst(void) __naked {
 #define NAME_SIZE	7
 #define ENTRY_SIZE	11
 
+static struct Sprite {
+    byte y;
+    byte idx;
+    byte cfg;
+    byte x;
+};
+
+extern struct Sprite spr[64];
 extern byte oam[256];
 
 extern volatile word ppu_ptr;
@@ -623,8 +632,11 @@ static void show_score(void) {
 #define LEVEL testing
 #endif
 
+#define SNOW_L 10
+#define SNOW_R 11
+
 static void setup_snow(void) {
-    oam[40] = oam[44] = 0x44;
+    spr[SNOW_L].y = spr[SNOW_R].y = 0x44;
 }
 
 static void start_new_game(void) {
@@ -641,19 +653,19 @@ static void start_new_game(void) {
 }
 
 static void hide_snow(void) {
-    oam[41] = oam[45] = 0xff;
+    spr[SNOW_L].idx = spr[SNOW_R].idx = 0xff;
 }
 
 #define ADJUST_SNOW(dx1, dx2, a1, a2) \
-    oam[43] = pos - dx1; \
-    oam[47] = pos + dx2; \
-    oam[42] = a1; \
-    oam[46] = a2;
+    spr[SNOW_L].x = pos - dx1; \
+    spr[SNOW_R].x = pos + dx2; \
+    spr[SNOW_L].cfg = a1; \
+    spr[SNOW_R].cfg = a2;
 
 static void animate_snow(byte n) {
     byte frame = (counter & 0xc) >> 2;
-    oam[41] = 12 + frame;
-    oam[45] = 12 + ((frame + 2) & 3);
+    spr[SNOW_L].idx = 12 + frame;
+    spr[SNOW_R].idx = 12 + ((frame + 2) & 3);
 
     if (n == 3) {
 	ADJUST_SNOW(6, 2, 0x00, 0x00);
