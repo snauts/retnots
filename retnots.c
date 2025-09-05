@@ -732,11 +732,13 @@ static const char *finish_str(void) {
 #define ENTER_X	13
 #define ENTER_Y	14
 
+#define CARET 32
+
 static void move_caret(byte caret) {
-    oam[128] = 8 * ENTER_Y + 2;
-    oam[129] = counter & 0x10 ? 0x1f : 0x2f;
-    oam[130] = 0x0;
-    oam[131] = 8 * ENTER_X + (caret << 3);
+    spr[CARET].x = 8 * ENTER_X + (caret << 3);
+    spr[CARET].y = 8 * ENTER_Y + 2;
+    spr[CARET].idx = counter & 0x10 ? 0x1f : 0x2f;
+    spr[CARET].cfg = 0x0;
 }
 
 static void update_char(byte *ptr, byte dir) {
@@ -775,7 +777,7 @@ static void enter_new_record_name(byte *name) {
 	byte state = check_button();
 
 	if (state & BUTTON_START) {
-	    oam[129] = 0xff;
+	    spr[CARET].idx = 0xff;
 	    break;
 	}
 	else if (state & SKI_LEFT) {
