@@ -339,7 +339,7 @@ static void wait_button(void) {
     while (no_button_push()) { }
 }
 
-static const char special[] = ".!?";
+static const char special[] = ".:?";
 
 static byte char_to_tile(char c) {
     byte sym = c + START_OF_fonts;
@@ -906,8 +906,16 @@ static void end_game_scene(void) {
     copy_score_from_oam();
 }
 
+static void show_final_score(void) {
+    print_msg("SCORE:", POS(11, 15));
+    memcpy(ppu_buffer, score, SIZE(score));
+    ppu_ptr = POS(18, 15);
+    ppu_update(SIZE(score));
+}
+
 static void stop_game(void) {
-    print_msg(finish_str(), POS(12, 12));
+    print_msg(finish_str(), POS(12, 13));
+    show_final_score();
     setup_palette();
     wait_button();
 }
