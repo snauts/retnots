@@ -139,11 +139,14 @@ void rst(void) __naked {
 
 /* sprites */
 #define HEAD	1
+#define TAIL	1
 #define DIGIT	9
+#define DEBRIS	9
 #define SNOW_L	10
 #define SNOW_R	11
 #define SCORE	16
 #define LAST	19
+#define LIVES	20
 #define CARET	32
 
 static struct Sprite {
@@ -540,8 +543,7 @@ static void get_score(byte amount) {
 }
 
 static void loose_live(void) {
-    if (lives > 0) oam[77 + (lives << 2)] = 0xff;
-    lives--;
+    if (--lives >= 0) spr[LIVES + lives].idx = 0xff;
 }
 
 static const byte tile_score[] = {
@@ -632,7 +634,7 @@ static const byte score_img[] = {
 };
 
 static void show_score(void) {
-    memcpy(oam + 64, score_img, SIZE(score_img));
+    memcpy(oam + 4 * SCORE, score_img, SIZE(score_img));
 }
 
 #ifdef slope_pcx
@@ -837,7 +839,7 @@ static void update_table(void) {
 
 static void copy_score_from_oam(void) {
     for (byte i = 0; i < SIZE(score); i++) {
-	score[i] = char_to_tile(oam[65 + (i << 2)] + '0');
+	score[i] = char_to_tile(spr[SCORE + i].idx + '0');
     }
 }
 
@@ -847,21 +849,20 @@ static const byte debris_img[] = {
 };
 
 static void setup_debris_sprites(void) {
-    memcpy(oam + 36, debris_img, SIZE(debris_img));
-    for (byte i = 39; i <= 51; i += 4) oam[i] += pos;
+    memcpy(oam + 4 * DEBRIS, debris_img, SIZE(debris_img));
+    for (byte i = DEBRIS; i < DEBRIS + 4; i++) spr[i].x += pos;
 }
 
-static void update_oam(byte n, int8 dir) {
-    byte x = oam[n];
-    byte s = n - 2;
+static void update_oam(struct Sprite *s, int8 dir) {
+    byte x = s->x;
     if (x > 0 && x < 248) {
-	oam[n] = x + dir;
+	s->x = x + dir;
 	if ((counter & 7) == 0) {
-	    oam[s] ^= 0x10;
+	    s->idx ^= 0x10;
 	}
     }
     else {
-	oam[s] = 0xff;
+	s->idx = 0xff;
     }
 }
 
@@ -871,25 +872,26 @@ static void failure_slide(void) {
     for (byte n = 0; n < 64; n++) {
 	wait_signal();
 	sound_effect();
-	oam[6] = (n & 8) ? BIT(6) : 0;
+	spr[TAIL].cfg = (n & 8) ? BIT(6) : 0;
 	for (byte i = 0; i < 44; i += 4) {
 	    oam[i]++;
 	}
-	update_oam(39, -1);
-	update_oam(43, +1);
-	update_oam(47, -1);
-	update_oam(51, +1);
+	struct Sprite *s = spr + DEBRIS;
+	update_oam(s++, -1);
+	update_oam(s++, +1);
+	update_oam(s++, -1);
+	update_oam(s++, +1);
     }
 }
 
 static void convert_live(void) {
-    if (lives > 0 && oam[37] == 0xff) {
+    if (lives > 0 && spr[DIGIT].idx == 0xff) {
 	get_score(9);
 	loose_live();
-	oam[37] = 10;
+	spr[DIGIT].idx = 10;
     }
-    else if (oam[36] == 0x24) {
-	oam[37] = 9;
+    else if (spr[DIGIT].y == 0x24) {
+	spr[DIGIT].idx = 9;
     }
 }
 
@@ -906,7 +908,7 @@ static void victory_scene(void) {
 	convert_live();
 	sound_effect();
     }
-    while (oam[37] != 0xff);
+    while (spr[DIGIT].idx != 0xff);
 
     while (no_button_push()) {
 	wait_signal();
