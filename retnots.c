@@ -137,6 +137,13 @@ void rst(void) __naked {
 #define NAME_SIZE	7
 #define ENTRY_SIZE	11
 
+/* sprites */
+#define SNOW_L	10
+#define SNOW_R	11
+#define SCORE	16
+#define LAST	19
+#define CARET	32
+
 static struct Sprite {
     byte y;
     byte idx;
@@ -482,10 +489,10 @@ static void produce_new_row(void) {
 }
 
 static void inc_score(byte amount) {
-    for (byte i = 77; i > 64; i -= 4) {
-	oam[i] += amount;
-	if (oam[i] >= 10) {
-	    oam[i] -= 10;
+    for (byte i = LAST; i >= SCORE; i--) {
+	spr[i].idx += amount;
+	if (spr[i].idx >= 10) {
+	    spr[i].idx -= 10;
 	    amount = 1;
 	}
 	else break;
@@ -632,9 +639,6 @@ static void show_score(void) {
 #define LEVEL testing
 #endif
 
-#define SNOW_L 10
-#define SNOW_R 11
-
 static void setup_snow(void) {
     spr[SNOW_L].y = spr[SNOW_R].y = 0x44;
 }
@@ -731,8 +735,6 @@ static const char *finish_str(void) {
 
 #define ENTER_X	13
 #define ENTER_Y	14
-
-#define CARET 32
 
 static void move_caret(byte caret) {
     spr[CARET].x = 8 * ENTER_X + (caret << 3);
