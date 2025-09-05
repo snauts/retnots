@@ -138,6 +138,8 @@ void rst(void) __naked {
 #define ENTRY_SIZE	11
 
 /* sprites */
+#define HEAD	1
+#define DIGIT	9
 #define SNOW_L	10
 #define SNOW_R	11
 #define SCORE	16
@@ -518,21 +520,21 @@ static void sound_effect(void) {
 }
 
 static void animate_score(void) {
-    if (oam[37] != 0xff) {
-	if (oam[36]-- < 0x10) {
-	    oam[37] = 0xff;
+    if (spr[DIGIT].idx != 0xff) {
+	if (spr[DIGIT].y-- < 0x10) {
+	    spr[DIGIT].idx = 0xff;
 	}
-	else if (oam[36] == 0x14) {
-	    oam[37] = 0x0b;
+	else if (spr[DIGIT].y == 0x14) {
+	    spr[DIGIT].idx = 0x0b;
 	}
     }
 }
 
 static void get_score(byte amount) {
-    oam[36] = oam[4];
-    oam[37] = amount;
-    oam[38] = 0x01;
-    oam[39] = oam[7];
+    spr[DIGIT].x = spr[HEAD].x;
+    spr[DIGIT].y = spr[HEAD].y;
+    spr[DIGIT].idx = amount;
+    spr[DIGIT].cfg = 0x01;
     inc_score(amount);
     bling = 0x0f;
 }
