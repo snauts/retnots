@@ -792,10 +792,10 @@ static void enter_new_record_name(byte *name) {
 	else if (state & SKI_RIGHT) {
 	    caret = caret == (NAME_SIZE - 1) ? 0 : caret + 1;
 	}
-	else if (state & BUTTON_UP) {
+	else if (state & BUTTON_DOWN) {
 	    update_char(name + caret, 255);
 	}
-	else if (state & BUTTON_DOWN) {
+	else if (state & BUTTON_UP) {
 	    update_char(name + caret, 1);
 	}
 
