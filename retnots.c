@@ -707,7 +707,7 @@ static void check_controls(void) {
 	i = counter & 0x10 ? 0x0c : 0x3c;
     }
     else if (bump == JUMP) {
-	i = counter & 0x10 ? 0x66 : 0x96;
+	i = counter & 0x08 ? 0x66 : 0x96;
     }
     else if (bump > SPECIAL) {
 	i = 0x60;
