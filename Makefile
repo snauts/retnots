@@ -45,7 +45,7 @@ size:
 	echo Link $(NAME).ihx
 	sdld $(LFLAGS) -m -i $(NAME).ihx $(NAME).rel
 	echo Convert $(NAME).prg
-	hex2bin -e prg $(NAME).ihx > /dev/null
+	makebin -p -yo A -o 0x8000 retnots.ihx retnots.prg
 	cat tiles.chr sprites.chr > $(NAME).chr
 	cat header.rom $(NAME).prg $(NAME).chr > $(NAME).nes
 	SEG=CODE $(MAKE) size
