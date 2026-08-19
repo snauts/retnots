@@ -3,11 +3,8 @@ LEVEL  ?= slope.pcx
 MAKE   = make --no-print-directory
 CROP   ?= 130
 
-ROM    := 0x8000
-
 CFLAGS = --nostdinc --nostdlib --no-std-crt0 --no-zp-spill --opt-code-speed
-LFLAGS = -n -b OAM=0x200 -b BSS=0x300 -b CODE=$(ROM) -b VECTOR=0xfffa
-LFLAGS += -b RODATA=$(ROM)+_end_of_code
+LFLAGS = -n -b OAM=0x200 -b BSS=0x300 -b RODATA=0x8000 -b VECTOR=0xfffa
 
 TOOL_FILES = pcx-dump.c lz.c
 

@@ -48,7 +48,7 @@ void sdcc_deps(void) __naked {
     __asm__("_spr:");
     __asm__("_oam:		.ds 256");
 
-    __asm__(".area CODE");
+    __asm__(".area RODATA");
 }
 
 void irq(void) __naked {
