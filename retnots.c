@@ -1064,7 +1064,7 @@ void game_startup(void) {
 }
 
 /* must be very last */
-void jump_vectors(void) __naked {
+void end_of_code(void) __naked {
     __asm__(".area VECTOR (PAG)");
     __asm__("nmi_ptr::	.dw _nmi");
     __asm__("rst_ptr::	.dw _rst");
